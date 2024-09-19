@@ -17,5 +17,6 @@ int main(int argc, char **argv)
             std::cerr << e.what() << '\n';
         }
     }
-
+    else
+        std::cout << "Usage: ./testeo [filename].conf" << std::endl;
 }
