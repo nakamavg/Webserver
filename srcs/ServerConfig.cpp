@@ -1,5 +1,5 @@
 
-#include "../incs/configFile.hpp"
+#include "../incs/ServerConfig.hpp"
 
 void validFileName(const std::string& fileName)
 {

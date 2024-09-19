@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -Werror -std=c++98
 RM = rm -rf
 NAME = testeo
 
-SRCS = srcs/configFile.cpp\
+SRCS = srcs/ServerConfig.cpp\
 	   main.cpp
 OBJS = $(SRCS:.cpp=.o)
 

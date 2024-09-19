@@ -1,5 +1,5 @@
-#ifndef CONFIGFILE_HPP
-# define CONFIGFILE_HPP
+#ifndef SERVERCONFIG_HPP
+# define SERVERCONFIG_HPP
 
 #include <iostream>
 #include <fstream>
@@ -19,13 +19,13 @@ public:
     }
 };
 
-class configFile
+class ServerConfig
 {
     public:
-        configFile();
-        configFile(const configFile &copy);
-        virtual ~configFile();
-        configFile &operator=(const configFile &src);
+        ServerConfig();
+        ServerConfig(const ServerConfig &copy);
+        virtual ~ServerConfig();
+        ServerConfig &operator=(const ServerConfig &src);
 
     private:
 
