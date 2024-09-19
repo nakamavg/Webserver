@@ -9,8 +9,11 @@ int main(int argc, char **argv)
         // std::string fileName = "default.conf";
         try
         {
-            validFileName(argv[1]);
-            std::cout << "all gud" << std::endl;
+            ServerConfig serverConfig;
+
+            serverConfig.validFileName(argv[1]);
+            serverConfig.readConfFile(argv[1]);
+            //std::cout << "all gud" << std::endl;
         }
         catch(const std::exception& e)
         {
