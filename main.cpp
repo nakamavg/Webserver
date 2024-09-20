@@ -13,6 +13,7 @@ int main(int argc, char **argv)
 
             serverConfig.validFileName(argv[1]);
             serverConfig.readConfFile(argv[1]);
+            serverConfig.parseFile();
             //std::cout << "all gud" << std::endl;
         }
         catch(const std::exception& e)

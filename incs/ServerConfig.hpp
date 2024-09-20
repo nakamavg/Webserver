@@ -1,31 +1,11 @@
 #ifndef SERVERCONFIG_HPP
 # define SERVERCONFIG_HPP
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <map>
-
-class FileExtensionException : public std::exception {
-public:
-    const char* what() const throw() {
-        return "Error: Config file Extension not found";
-    }
-};
-
-class FileLocationException : public std::exception {
-public:
-    const char* what() const throw() {
-        return "Error: File not found in the config folder";
-    }
-};
-
-class FileOpeningException : public std::exception {
-public:
-    const char* what() const throw() {
-        return "Error: The File couldn't be openned";
-    }
-};
+# include <iostream>
+# include <fstream>
+# include <vector>
+# include <map>
+# include "MyException.hpp"
 
 class ServerConfig
 {
@@ -35,9 +15,10 @@ class ServerConfig
         virtual ~ServerConfig();
         ServerConfig &operator=(const ServerConfig &src);
 
-        void parseLine (const std::string &line);
+        void selectLine (const std::string &line);
         void readConfFile(const std::string& fileName);
         void validFileName(const std::string& fileName);
+        void parseFile ();
 
     private:
         // Configuración general del servidor
@@ -102,7 +83,6 @@ class ServerConfig
         // Getter y Setter para raw_file
         std::vector<std::string> getRawFile() const { return raw_file; }
         void setRawFile(const std::vector<std::string> &newRawFile) { raw_file = newRawFile; }
-
 };
 
 #endif

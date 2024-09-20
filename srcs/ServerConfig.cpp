@@ -42,29 +42,43 @@ ServerConfig &ServerConfig::operator=(const ServerConfig &src)
 void ServerConfig::validFileName(const std::string& fileName)
 {
     if (fileName.size() < 5 || fileName.substr(fileName.size() - 5) != ".conf")
-        throw FileExtensionException();
+        throw MyException("Error: Config file Extension not found");
 
     const std::string fullPath = "config/" + fileName;
 
     std::ifstream file(fullPath.c_str());
     if (!file.good())
-        throw FileLocationException();
+        throw MyException("Error: File not found in the config folder");
 }
 
-void ServerConfig::parseLine (const std::string &line)
+void ServerConfig::selectLine (const std::string &line)
 {
     size_t start = 0;
+
     while (start < line.size() && std::isspace(static_cast<unsigned char>(line[start])))
         ++start;
 
     if (start >= line.size() || line[start] == '#')
         return;
 
-    std::string trimmedLine = line.substr(start);
-    if (trimmedLine.find_first_not_of(" \t") != std::string::npos)
+    size_t commentPos = line.find('#', start);
+
+    std::string trimmedLine = (commentPos != std::string::npos) ? line.substr(start, commentPos - start) : line.substr(start);
+
+    int end = trimmedLine.size();
+    while (end >= 0 && (trimmedLine[end] == ' ' || trimmedLine[end] == '\t' || trimmedLine[end] == '\r' || trimmedLine[end] == '\0'))
     {
-        raw_file.push_back(trimmedLine);
-        std::cout << "pushing line: " << trimmedLine << std::endl;
+       end--;
+    }
+    char lastChar = trimmedLine[end];
+    if (!trimmedLine.empty())
+    {
+        if (lastChar == '{' || lastChar == '}' || lastChar == ';')
+            raw_file.push_back(trimmedLine);
+        else
+        {
+            throw MyException("Error: Syntax error");
+        }
     }
 }
 
@@ -74,19 +88,24 @@ void ServerConfig::readConfFile(const std::string& fileName)
 
     std::ifstream file(fullPath.c_str());
     if (!file.is_open())
-        throw FileOpeningException();
+        throw MyException("Error: The File couldn't be openned");
     
     std::string line;
     while (std::getline(file, line))
     {
-        ServerConfig::parseLine(line);
+        ServerConfig::selectLine(line);
     }
     file.close();
 
-    // std::cout << "READING FROM RAW_FILE" << std::endl;
-    // for (std::size_t i = 0; i < raw_file.size(); ++i) {
-    //     std::cout << raw_file[i] << " ";
-    // }
-    // std::cout << std::endl;
+}
 
+void ServerConfig::parseFile()
+{
+    std::string str;
+
+    for (std::vector<std::string>::iterator it = raw_file.begin(); it != raw_file.end(); ++it)
+    {
+        str = *it;
+        std::cout << str << std::endl;
+    }
 }
