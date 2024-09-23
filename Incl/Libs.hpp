@@ -1,0 +1,14 @@
+#pragma once
+#include <algorithm>
+#include <fcntl.h>
+#include <iostream>
+#include <sys/socket.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/epoll.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <signal.h>
+#include "../Server/ServerUp.hpp"
