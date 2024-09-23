@@ -4,6 +4,7 @@ RM = rm -rf
 NAME = testeo
 
 SRCS = srcs/ServerConfig.cpp\
+	   srcs/WebServer.cpp\
 	   main.cpp
 OBJS = $(SRCS:.cpp=.o)
 

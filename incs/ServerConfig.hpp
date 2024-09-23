@@ -18,11 +18,6 @@ class ServerConfig
         virtual ~ServerConfig();
         ServerConfig &operator=(const ServerConfig &src);
 
-        void selectLine (const std::string &line);
-        void readConfFile(const std::string& fileName);
-        void validFileName(const std::string& fileName);
-        void parseFile ();
-
     private:
         // Configuración general del servidor
         std::string host;                               // Nombre del servidor para el manejo de virtual hosts
@@ -30,7 +25,6 @@ class ServerConfig
         std::vector<std::string> server_names;          // Nombres de dominio aceptados
         size_t client_max_body_size;                    // Tamaño máximo del cuerpo de la solicitud
         std::map<int, std::string> error_pages;         // Páginas de error por defecto (código -> archivo)
-        std::vector<std::string> raw_file;
 
         // Configuración de rutas
         struct RouteConfig {
@@ -83,9 +77,6 @@ class ServerConfig
         std::map<int, std::string> getErrorPages() const { return error_pages; }
         void setErrorPages(const std::map<int, std::string> &newErrorPages) { error_pages = newErrorPages; }
 
-        // Getter y Setter para raw_file
-        std::vector<std::string> getRawFile() const { return raw_file; }
-        void setRawFile(const std::vector<std::string> &newRawFile) { raw_file = newRawFile; }
 };
 
 #endif

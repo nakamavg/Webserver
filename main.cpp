@@ -1,7 +1,6 @@
 
 
-#include "incs/ServerConfig.hpp"
-
+#include "incs/WebServer.hpp"
 int main(int argc, char **argv)
 {
     if (argc == 2)
@@ -9,12 +8,12 @@ int main(int argc, char **argv)
         // std::string fileName = "default.conf";
         try
         {
-            ServerConfig serverConfig;
+            WebServer ws;
 
-            serverConfig.validFileName(argv[1]);
-            serverConfig.readConfFile(argv[1]);
-            serverConfig.parseFile();
-            //std::cout << "all gud" << std::endl;
+            ws.validFileName(argv[1]);
+            ws.readConfFile(argv[1]);
+            ws.parseFile();
+            std::cout << "Number of servers found: " << ws.getServerConfigs().size()  << std::endl;
         }
         catch(const std::exception& e)
         {
