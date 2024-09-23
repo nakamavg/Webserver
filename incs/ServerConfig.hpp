@@ -5,6 +5,9 @@
 # include <fstream>
 # include <vector>
 # include <map>
+# include <string>
+# include <stack>
+
 # include "MyException.hpp"
 
 class ServerConfig

@@ -38,7 +38,6 @@ ServerConfig &ServerConfig::operator=(const ServerConfig &src)
     return *this;
 }
 
-
 void ServerConfig::validFileName(const std::string& fileName)
 {
     if (fileName.size() < 5 || fileName.substr(fileName.size() - 5) != ".conf")
@@ -65,14 +64,17 @@ void ServerConfig::selectLine (const std::string &line)
 
     std::string trimmedLine = (commentPos != std::string::npos) ? line.substr(start, commentPos - start) : line.substr(start);
 
-    int end = trimmedLine.size();
-    while (end >= 0 && (trimmedLine[end] == ' ' || trimmedLine[end] == '\t' || trimmedLine[end] == '\r' || trimmedLine[end] == '\0'))
+    int end = trimmedLine.size() - 1;
+    while (end >= 0 && (trimmedLine[end] == ' ' || trimmedLine[end] == '\t' || trimmedLine[end] == '\r' || trimmedLine[end] == '\n'))
     {
        end--;
     }
-    char lastChar = trimmedLine[end];
+
+    trimmedLine = trimmedLine.substr(0, end + 1);
+
     if (!trimmedLine.empty())
     {
+        char lastChar = trimmedLine[trimmedLine.size() - 1];
         if (lastChar == '{' || lastChar == '}' || lastChar == ';')
             raw_file.push_back(trimmedLine);
         else
@@ -101,11 +103,79 @@ void ServerConfig::readConfFile(const std::string& fileName)
 
 void ServerConfig::parseFile()
 {
-    std::string str;
+    std::string line;
+    bool serverFlag = false;
+    int brackets = 0;
+    bool locationFlag = false;
+    bool uploadFlag = false;
+    bool cgiFlag = false;
 
     for (std::vector<std::string>::iterator it = raw_file.begin(); it != raw_file.end(); ++it)
     {
-        str = *it;
-        std::cout << str << std::endl;
+        line = *it;
+        //std::cout << "-" << line << "-" << std::endl;
+
+        if (line == "server {")
+        {
+            if (!serverFlag)
+            {
+                serverFlag = true;
+                brackets++;
+                //Create a serverConfig obj
+            }
+            else
+                throw MyException("Error: Syntax error (server)");
+        }
+        else if (line == "location / {")
+        {
+            if (!locationFlag)
+            {
+                locationFlag = true;
+                brackets++;
+            }
+            else
+                throw MyException("Error: Syntax error (location)");
+        }
+        else if (line == "location /uploads {")
+        {
+            if (!uploadFlag)
+            {
+                uploadFlag = true;
+                brackets++;
+            }
+            else
+                throw MyException("Error: Syntax error (uploads)");
+        }
+        else if (line == "location /cgi-bin {")
+        {
+            if (!cgiFlag)
+            {
+                cgiFlag = true;
+                brackets++;
+            }
+            else
+                throw MyException("Error: Syntax error (cgi-bin)");
+        }
+        else
+        {
+            for (size_t i = 0; i < line.size(); ++i)
+            {
+                if (line[i] == '{')
+                    brackets++;
+                else if (line[i] == '}')
+                    brackets--;
+            }
+        }
+
+        if (brackets == 0)
+        {
+            //server bracket closed
+            serverFlag = false;
+            locationFlag = false;
+            uploadFlag = false;
+            cgiFlag = false;
+        }
     }
+    if (brackets !=0)
+        throw MyException("Error: Check the brackets!");
 }
