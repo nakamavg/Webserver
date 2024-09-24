@@ -46,6 +46,7 @@ void WebServer::selectLine (const std::string &line)
     }
 }
 
+
 void WebServer::readConfFile(const std::string& fileName)
 {
     const std::string fullPath = "config/" + fileName;
@@ -63,34 +64,20 @@ void WebServer::readConfFile(const std::string& fileName)
 
 }
 
-void WebServer::parseFile()
+void WebServer::manageServerBracket(std::vector<std::string>::iterator &line)
 {
-    std::string line;
-    bool serverFlag = false;
-    int brackets = 0;
+    int brackets = 1;
     bool locationFlag = false;
     bool uploadFlag = false;
     bool cgiFlag = false;
 
-    for (std::vector<std::string>::iterator it = raw_file.begin(); it != raw_file.end(); ++it)
+    //Create a serverConfig obj
+    ServerConfig sc;
+    while (brackets != 0  && (line != raw_file.end()))
     {
-        line = *it;
-        //std::cout << "-" << line << "-" << std::endl;
+        
 
-        if (line == "server {")
-        {
-            if (!serverFlag)
-            {
-                serverFlag = true;
-                brackets++;
-                //Create a serverConfig obj
-                ServerConfig sc;
-                serverConfigs.push_back(sc);
-            }
-            else
-                throw MyException("Error: Syntax error (server)");
-        }
-        else if (line == "location / {")
+        if (*line == "location / {")
         {
             if (!locationFlag)
             {
@@ -100,7 +87,7 @@ void WebServer::parseFile()
             else
                 throw MyException("Error: Syntax error (location)");
         }
-        else if (line == "location /uploads {")
+        else if (*line == "location /uploads {")
         {
             if (!uploadFlag)
             {
@@ -110,7 +97,7 @@ void WebServer::parseFile()
             else
                 throw MyException("Error: Syntax error (uploads)");
         }
-        else if (line == "location /cgi-bin {")
+        else if (*line == "location /cgi-bin {")
         {
             if (!cgiFlag)
             {
@@ -122,23 +109,58 @@ void WebServer::parseFile()
         }
         else
         {
-            for (size_t i = 0; i < line.size(); ++i)
+            for (size_t i = 0; i < (*line).size(); ++i)
             {
-                if (line[i] == '{')
+                if ((*line)[i] == '{')
                     brackets++;
-                else if (line[i] == '}')
+                else if ((*line)[i] == '}')
                     brackets--;
             }
         }
+            if (brackets != 0)
+                std::cout << "->>" << *line << "<<-" << std::endl;
+        *line++;
+    }
 
-        if (brackets == 0)
+    if (locationFlag == false || uploadFlag == false || cgiFlag == false)
+        throw MyException("Error: Missing info inside the server");
+    serverConfigs.push_back(sc);
+    *line--;    //volvemos atras para evaluar el }
+    *line--;
+    // std::cout << "exiting line= " << *line << std::endl;
+}
+
+void WebServer::parseFile()
+{
+    bool serverFlag = false;
+    int brackets = 0;
+
+    if (raw_file.empty())
+        throw MyException("Errors: Server not found");
+
+    for (std::vector<std::string>::iterator line = raw_file.begin(); line != raw_file.end(); ++line)
+    {
+        std::cout << "->" << *line << "<-" << std::endl;
+
+        if (*line == "server {")
+        {
+            if (!serverFlag)
+            {
+                serverFlag = true;
+                brackets++;
+                manageServerBracket(++line);
+            }
+            else
+                throw MyException("Error: Syntax error (server)");
+        }
+        else if (*line == "}")
         {
             //server bracket closed
             serverFlag = false;
-            locationFlag = false;
-            uploadFlag = false;
-            cgiFlag = false;
+            brackets--;
         }
+        else
+            throw MyException("Error: Servers syntax");
     }
     if (brackets !=0)
         throw MyException("Error: Check the brackets!");

@@ -17,7 +17,8 @@ class WebServer
         void selectLine (const std::string &line);
         void readConfFile(const std::string& fileName);
         void validFileName(const std::string& fileName);
-        void parseFile ();
+        void parseFile();
+        void manageServerBracket(std::vector<std::string>::iterator &line);
 
         const std::vector<ServerConfig>& getServerConfigs() const
         {
