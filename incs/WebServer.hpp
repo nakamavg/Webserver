@@ -19,6 +19,10 @@ class WebServer
         void validFileName(const std::string& fileName);
         void parseFile();
         void manageServerBracket(std::vector<std::string>::iterator &line);
+        void manageLocationBracket(std::vector<std::string>::iterator &line);
+        void manageUploadsBracket(std::vector<std::string>::iterator &line);
+        void manageCgiBinBracket(std::vector<std::string>::iterator &line);
+        void manageServerBracketVar(std::vector<std::string>::iterator &line, bool &listen, bool &server_name, bool &client_max, bool &error_pages);
 
         const std::vector<ServerConfig>& getServerConfigs() const
         {
