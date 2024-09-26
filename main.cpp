@@ -1,4 +1,6 @@
 #include "Server/ServerUp.hpp"
+#include "Server/serverlist.hpp"
+
 bool printenv(char **env)
 {
 	/*
@@ -20,8 +22,13 @@ int main(int ar, char **argv, char **env)
 	else if (ar == 2)
 	{
 		printenv(env);
+		std::vector<serverlist> lista;
+		serverlist pepe("127.0.0.1",8080);
+		serverlist manolo("127.0.0.1",8081);
+	lista.push_back(pepe);
+	lista.push_back(manolo);
 	std::cout << "Hola server"<< std::endl;
-	ServerUp a("127.0.0.1",8080);
+	ServerUp a(lista);
 	a.start();
 	}
 	else

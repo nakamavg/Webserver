@@ -12,3 +12,4 @@
 #include <string.h>
 #include <signal.h>
 #include "../Server/ServerUp.hpp"
+#include <vector>
