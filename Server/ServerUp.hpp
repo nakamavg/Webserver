@@ -2,6 +2,7 @@
 #include "../Incl/Libs.hpp"
 #include "serverlist.hpp"
 #include <vector>
+#include <map>
 #define MAGIC_NUMBER 64
 class serverlist;
 class ServerUp {
@@ -18,8 +19,11 @@ private:
 	std::string ip;
 	size_t port;
 	size_t nServers;
-	void GenStruct(sockaddr_in *setstruct);
+	std::vector<serverlist> list; 
+	void GenStruct(std::map<int, sockaddr_in> *servers, std::vector<int> *sockets);
 	std::vector<int> get_SocketsOfServer();
+	bool setupServerSocket(int serverSocket, const sockaddr_in& serverAddress);
+
 
 
 };
