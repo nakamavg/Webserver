@@ -19,10 +19,11 @@ class WebServer
         void validFileName(const std::string& fileName);
         void parseFile();
         void manageServerBracket(std::vector<std::string>::iterator &line);
-        void manageLocationBracket(std::vector<std::string>::iterator &line);
-        void manageUploadsBracket(std::vector<std::string>::iterator &line);
-        void manageCgiBinBracket(std::vector<std::string>::iterator &line);
-        void manageServerBracketVar(std::vector<std::string>::iterator &line, bool &listen, bool &server_name, bool &client_max, bool &error_pages);
+        void manageLocationBracket(std::vector<std::string>::iterator &line, ServerConfig &sc);
+        //void manageUploadsBracket(std::vector<std::string>::iterator &line, ServerConfig &sc);
+        //void manageCgiBinBracket(std::vector<std::string>::iterator &line, ServerConfig &sc);
+        void manageServerBracketVar(std::vector<std::string>::iterator &line, bool &listen, bool &server_name, bool &client_max, bool &error_pages, ServerConfig &sc);
+        //void manageVarLine(int id, std::string value, ServerConfig &sc);
 
         const std::vector<ServerConfig>& getServerConfigs() const
         {
@@ -43,8 +44,6 @@ class WebServer
         {
             raw_file = rawFileContent;
         }
-
-
 
     private:
         std::vector<ServerConfig> serverConfigs;

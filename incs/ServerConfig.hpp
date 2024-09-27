@@ -10,52 +10,27 @@
 
 # include "MyException.hpp"
 
+struct Locations {
+    std::string path;                           // Directorio raíz para esta ruta
+    std::vector<std::string> allowed_methods;   // Lista de métodos HTTP permitidos
+    std::string redirect;                       // URL de redirección
+    bool autoindex;                             // Listado de directorios activado/desactivado
+    std::string default_file;                   // Archivo por defecto para responder si se solicita un directorio
+    std::string upload_dir;                     // Directorio para subir archivos
+    bool upload_enable;                         // Habilitar la carga de archivos
+    std::string path_info;                      // Ruta de información para el CGI
+    std::string cgi_extension;                  // Extensión de archivo que activa el CGI
+
+    Locations(); //: path(NULL), allowed_methods(0), redirect(NULL), autoindex(false), default_file(NULL), upload_dir(NULL), upload_enable(false), path_info(NULL), cgi_extension(NULL){} // Constructor por defecto
+};
+
 class ServerConfig
 {
     public:
-        ServerConfig() : port(80), client_max_body_size(0) {};
+        ServerConfig();
         ServerConfig(const ServerConfig &copy);
-        virtual ~ServerConfig();
+        ~ServerConfig();
         ServerConfig &operator=(const ServerConfig &src);
-
-    private:
-        // Configuración general del servidor
-        std::string host;                               // Nombre del servidor para el manejo de virtual hosts
-        int port;                                       // Define el puerto en el que el servidor escuchará conexiones
-        std::vector<std::string> server_names;          // Nombres de dominio aceptados
-        size_t client_max_body_size;                    // Tamaño máximo del cuerpo de la solicitud
-        std::map<int, std::string> error_pages;         // Páginas de error por defecto (código -> archivo)
-
-        // Configuración de rutas
-        struct RouteConfig {
-            std::string path;                           // Directorio raíz para esta rutan
-            std::vector<std::string> allowed_methods;   // Lista de métodos HTTP permitidos
-            //std::string redirect;                       // URL de redirección
-            bool directory_listing;                     // Listado de directorios activado/desactivado
-            std::string default_file;                   // Archivo por defecto para responder si se solicita un directorio
-
-            RouteConfig() : directory_listing(false) {} // Constructor por defecto
-        };
-
-        //Configuracion de subida
-        struct UploadConfig {
-            std::string upload_dir;                     // Directorio para subir archivos
-            bool upload_enable;                         // Habilitar la carga de archivos
-
-            UploadConfig(){};
-        };
-
-        // Configuración de CGI
-        struct CGIConfig {
-            std::string path_info;                      // Ruta de información para el CGI
-            std::string cgi_extension;                  // Extensión de archivo que activa el CGI
-
-           CGIConfig(){};
-        };
-
-        CGIConfig cgi_config;                           // Configuración CGI
-        RouteConfig route_config;                       // Configuración rutas
-        UploadConfig upload_config;                     // Configuración subida
 
         // Getter y Setter para host
         std::string getHost() const { return host; }
@@ -77,6 +52,19 @@ class ServerConfig
         std::map<int, std::string> getErrorPages() const { return error_pages; }
         void setErrorPages(const std::map<int, std::string> &newErrorPages) { error_pages = newErrorPages; }
 
+        // Getter y Setter para locations
+        std::map<std::string, Locations> getLocations() const { return locations; }
+        void setLocations(const std::map<std::string, Locations> &newLocations) { locations = newLocations; }
+    private:
+        // Configuración general del servidor
+        std::string host;                               // Nombre del servidor para el manejo de virtual hosts
+        int port;                                       // Define el puerto en el que el servidor escuchará conexiones
+        std::vector<std::string> server_names;          // Nombres de dominio aceptados
+        size_t client_max_body_size;                    // Tamaño máximo del cuerpo de la solicitud
+        std::map<int, std::string> error_pages;         // Páginas de error por defecto (código -> archivo)
+        std::map<std::string, Locations> locations;     // Locations 
+        
+        //Locations locations;
 };
 
 #endif

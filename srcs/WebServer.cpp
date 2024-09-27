@@ -64,13 +64,28 @@ void WebServer::readConfFile(const std::string& fileName)
 
 }
 
-void WebServer::manageLocationBracket(std::vector<std::string>::iterator &line)
+std::string trimLeadingSpaces(const std::string& str) {
+    // Encuentra el primer carácter que no sea espacio (' ') ni tabulación ('\t')
+    std::size_t start = str.find_first_not_of(" \t");
+
+    // Si encuentra un carácter que no sea espacio ni tabulación
+    if (start != std::string::npos) {
+        return str.substr(start);
+    }
+
+    // Si la cadena está vacía o solo tiene espacios/tabulaciones, retorna una cadena vacía
+    return "";
+}
+
+
+void WebServer::manageLocationBracket(std::vector<std::string>::iterator &line, ServerConfig &sc)
 {
     int brackets = 1;
     bool root = false;
     bool allow_methods = false;
     bool directory_listing = false;
     bool index = false;
+    (void)sc;
 
     while (brackets != 0  && (line != raw_file.end()))
     {
@@ -115,116 +130,42 @@ void WebServer::manageLocationBracket(std::vector<std::string>::iterator &line)
     // std::cout << "exiting line= " << *line << std::endl;
 }
 
-void WebServer::manageUploadsBracket(std::vector<std::string>::iterator &line)
+void WebServer::manageServerBracketVar(std::vector<std::string>::iterator &line, bool &listen, bool &server_name, bool &client_max, bool &error_pages, ServerConfig &sc)
 {
-    int brackets = 1;
-    bool root = false;
-    bool upload_enabled = false;
-
-    while (brackets != 0  && (line != raw_file.end()))
-    {
-        //std::cout << "      " << *line << std::endl;
-        if (*line == "}")
-            brackets--;
-        else
-        {
-            if (line->find("root") == 0)
-            {
-                if (root == true)
-                    throw MyException ("Error: duplicated root on location /uploads");
-                root = true;
-            }
-            else if (line->find("upload_enabled") == 0)
-            {
-                if (upload_enabled == true)
-                    throw MyException("Error: duplicated upload_enabled on location /uploads");
-                upload_enabled = true;
-            }
-            else
-                throw MyException("Error: Syntax error on location /uploads");
-        }
-        line++;
-    }
-    line--;
-    line--;    //volvemos atras para evaluar el }
-    if (root == false || upload_enabled == false)
-        throw MyException("Error: Missing info in location /uploads");
-    // std::cout << "exiting line= " << *line << std::endl;
-}
-
-void WebServer::manageCgiBinBracket(std::vector<std::string>::iterator &line)
-{
-    int brackets = 1;
-    bool root = false;
-    bool cgi_extension = false;
-
-    while (brackets != 0  && (line != raw_file.end()))
-    {
-        //std::cout << "      " << *line << std::endl;
-        if (*line == "}")
-            brackets--;
-        else
-        {
-            if (line->find("root") == 0)
-            {
-                if (root == true)
-                    throw MyException ("Error: duplicated root on location /cgi-bin");
-                root = true;
-            }
-            else if (line->find("cgi_extension") == 0)
-            {
-                if (cgi_extension == true)
-                    throw MyException("Error: duplicated upload_enabled on location /cgi-bin");
-                cgi_extension = true;
-            }
-            else
-                throw MyException("Error: Syntax error on location /cgi-bin");
-        }
-        line++;
-    }
-    line--;
-    line--;    //volvemos atras para evaluar el }
-    if (root == false || cgi_extension == false)
-        throw MyException("Error: Missing info in location /cgi-bin");
-    // std::cout << "exiting line= " << *line << std::endl;
-}
-
-void WebServer::manageServerBracketVar(std::vector<std::string>::iterator &line, bool &listen, bool &server_name, bool &client_max, bool &error_pages)
-{
+    (void)sc;
     if (line->find("listen") == 0)
     {
         if (listen == true)
             throw MyException ("Error: duplicated listen on server");
         listen = true;
+        //line->substr(std::string("listen ").length())
     }
     else if (line->find("server_name") == 0)
     {
         if (server_name == true)
             throw MyException ("Error: duplicated server_name on server");
         server_name = true;
+        //line->substr(std::string("server_name ").length())
     }
     else if (line->find("client_max_body_size") == 0)
     {
         if (client_max == true)
             throw MyException ("Error: duplicated client_max_body_size on server");
         client_max = true;
+        //line->substr(std::string("client_max_body_size ").length());
     }
     else if (line->find("error_page") == 0)
     {
         error_pages = true;
+        //line->substr(std::string("error_page").length());
     }
+
 }
+
 void WebServer::manageServerBracket(std::vector<std::string>::iterator &line)
 {
     int brackets = 1;
-    bool locationFlag = false;
-    bool uploadFlag = false;
-    bool cgiFlag = false;
-
-    bool listenFlag = false;
-    bool serverNameFlag = false;
-    bool clientMaxFlag = false;
-    bool errorPagesFlag = false;
+    const std::string prefix = "location /";
 
     //Create a serverConfig obj
     ServerConfig sc;
@@ -232,49 +173,34 @@ void WebServer::manageServerBracket(std::vector<std::string>::iterator &line)
     {
         
         //std::cout << "  " << *line <<std::endl;
-        
-        if (*line == "location / {")
+            
+        // Verificar si la longitud de la línea es suficiente
+        if ((*line).size() >= prefix.size())
         {
-            if (!locationFlag)
+            if ((*line).substr(0, prefix.size()) == prefix)
             {
-                locationFlag = true;
+                std::string newLine = line->substr(std::string(prefix).length());
+                std::string locationName = std::string(newLine, 0, newLine.find_first_of(" "));
+
+                //Locations location;
+                std::cout << "location encontrado: " << locationName << std::endl;
+                //manageLocationBracket(line, sc);
                 brackets++;
-                manageLocationBracket(++line);
             }
-            else
-                throw MyException("Error: Syntax error (location) duplicated");
-        }
-        else if (*line == "location /uploads {")
-        {
-            if (!uploadFlag)
-            {
-                uploadFlag = true;
-                brackets++;
-                manageUploadsBracket(++line);
-            }
-            else
-                throw MyException("Error: Syntax error (uploads) duplicated ");
-        }
-        else if (*line == "location /cgi-bin {")
-        {
-            if (!cgiFlag)
-            {
-                cgiFlag = true;
-                brackets++;
-                manageCgiBinBracket(++line);
-            }
-            else
-                throw MyException("Error: Syntax error (cgi-bin) duplicated");
         }
         else if (*line == "}")
             brackets--;
         else
-            manageServerBracketVar(line, listenFlag, serverNameFlag, clientMaxFlag, errorPagesFlag);           
+        {
+            //manegar las variables sueltas
+            //manageServerBracketVar(line, listenFlag, serverNameFlag, clientMaxFlag, errorPagesFlag, sc);           
+        }
+            
         line++;
     }
 
-    if (locationFlag == false || uploadFlag == false || cgiFlag == false || listenFlag == false || serverNameFlag == false || errorPagesFlag == false)
-        throw MyException("Error: Missing info inside the server");
+    // if (locationFlag == false || uploadFlag == false || cgiFlag == false || listenFlag == false || serverNameFlag == false || errorPagesFlag == false)
+    //     throw MyException("Error: Missing info inside the server");
     serverConfigs.push_back(sc);
     line--;    //volvemos atras para evaluar el }
     line--;
@@ -291,7 +217,7 @@ void WebServer::parseFile()
 
     for (std::vector<std::string>::iterator line = raw_file.begin(); line != raw_file.end(); line++)
     {
-        //std::cout << *line << std::endl;
+        std::cout << *line << std::endl;
 
         if (*line == "server {")
         {
