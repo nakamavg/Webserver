@@ -11,17 +11,31 @@
 # include "MyException.hpp"
 
 struct Locations {
+    std::string id;
     std::string path;                           // Directorio raíz para esta ruta
     std::vector<std::string> allowed_methods;   // Lista de métodos HTTP permitidos
     std::string redirect;                       // URL de redirección
-    bool autoindex;                             // Listado de directorios activado/desactivado
+    bool autoindex;
+    std::string index;                            // Listado de directorios activado/desactivado
     std::string default_file;                   // Archivo por defecto para responder si se solicita un directorio
     std::string upload_dir;                     // Directorio para subir archivos
     bool upload_enable;                         // Habilitar la carga de archivos
     std::string path_info;                      // Ruta de información para el CGI
     std::string cgi_extension;                  // Extensión de archivo que activa el CGI
 
-    Locations(); //: path(NULL), allowed_methods(0), redirect(NULL), autoindex(false), default_file(NULL), upload_dir(NULL), upload_enable(false), path_info(NULL), cgi_extension(NULL){} // Constructor por defecto
+    // Constructor por defecto
+    Locations() 
+        : id(""),
+          path(""), 
+          allowed_methods(), // Inicializa el vector vacío
+          redirect(""), 
+          autoindex(false), 
+          index(""), 
+          default_file(""), 
+          upload_dir(""), 
+          upload_enable(false), 
+          path_info(""), 
+          cgi_extension("") {} // Puedes usar el inicializador para strings
 };
 
 class ServerConfig
@@ -32,6 +46,13 @@ class ServerConfig
         ~ServerConfig();
         ServerConfig &operator=(const ServerConfig &src);
 
+        ServerConfig manageServerBracket(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
+        Locations manageLocationBracket(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
+
+        void manageServerBracketVar(std::vector<std::string>::iterator &line, bool &listen, bool &server_name, bool &client_max, bool &error_pages, ServerConfig &sc);
+
+        void addLocation(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
+        
         // Getter y Setter para host
         std::string getHost() const { return host; }
         void setHost(const std::string &newHost) { host = newHost; }
@@ -55,6 +76,7 @@ class ServerConfig
         // Getter y Setter para locations
         std::map<std::string, Locations> getLocations() const { return locations; }
         void setLocations(const std::map<std::string, Locations> &newLocations) { locations = newLocations; }
+    
     private:
         // Configuración general del servidor
         std::string host;                               // Nombre del servidor para el manejo de virtual hosts
