@@ -1,5 +1,6 @@
 # Webserver
 Webserver c++98 
+[link epoll](https://idea.popcount.org/2017-02-20-epoll-is-fundamentally-broken-12/)
 
 #### Como deberia ser un archivo de conf
 # Configuración general del servidor
