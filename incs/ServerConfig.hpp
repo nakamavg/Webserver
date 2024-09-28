@@ -7,11 +7,12 @@
 # include <map>
 # include <string>
 # include <stack>
+# include <sstream>
 
 # include "MyException.hpp"
 
 struct Locations {
-    std::string id;
+    std::string id;                             //Identificador del location
     std::string path;                           // Directorio raíz para esta ruta
     std::vector<std::string> allowed_methods;   // Lista de métodos HTTP permitidos
     std::string redirect;                       // URL de redirección
@@ -47,9 +48,10 @@ class ServerConfig
         ServerConfig &operator=(const ServerConfig &src);
 
         ServerConfig manageServerBracket(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
+        
         Locations manageLocationBracket(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
 
-        void manageServerBracketVar(std::vector<std::string>::iterator &line, bool &listen, bool &server_name, bool &client_max, bool &error_pages, ServerConfig &sc);
+        void manageServerBracketVar(std::vector<std::string>::iterator &line, ServerConfig &sc);
 
         void addLocation(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
         

@@ -46,7 +46,6 @@ void WebServer::selectLine (const std::string &line)
     }
 }
 
-
 void WebServer::readConfFile(const std::string& fileName)
 {
     const std::string fullPath = "config/" + fileName;

@@ -26,6 +26,22 @@ ServerConfig &ServerConfig::operator=(const ServerConfig &src) {
     return *this;
 }
 
+int ft_stoi(std::string str)
+{
+    int number;
+
+    std::stringstream ss(str);
+
+    ss >> number;
+
+    if (ss.fail())
+    {
+        throw MyException ("Error: Couldn't format string into int");
+    }
+
+    return number;
+}
+
 std::string trimLeadingSpaces(const std::string& str) {
     // Encuentra el primer carácter que no sea espacio (' ') ni tabulación ('\t')
     std::size_t start = str.find_first_not_of(" \t");
@@ -136,36 +152,38 @@ Locations ServerConfig::manageLocationBracket(std::vector<std::string>::iterator
     return location;
 }
 
-void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &line, bool &listen, bool &server_name, bool &client_max, bool &error_pages, ServerConfig &sc)
+void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &line, ServerConfig &sc)
 {
-    (void)sc;
+    std::string valueLine;
     if (line->find("listen") == 0)
     {
-        if (listen == true)
+        if ((sc.port))
             throw MyException ("Error: duplicated listen on server");
-        listen = true;
-        //line->substr(std::string("listen ").length())
+
+        valueLine = line->substr(std::string("listen ").length());
+        sc.port = ft_stoi(valueLine);
     }
     else if (line->find("server_name") == 0)
     {
-        if (server_name == true)
+        if (!(sc.server_names).empty())
             throw MyException ("Error: duplicated server_name on server");
-        server_name = true;
-        //line->substr(std::string("server_name ").length())
+
+        valueLine = line->substr(std::string("server_name ").length());
+        sc.server_names.push_back(valueLine);
     }
     else if (line->find("client_max_body_size") == 0)
     {
-        if (client_max == true)
+        if (sc.client_max_body_size)
             throw MyException ("Error: duplicated client_max_body_size on server");
-        client_max = true;
-        //line->substr(std::string("client_max_body_size ").length());
+
+        valueLine = line->substr(std::string("client_max_body_size ").length());
+        sc.client_max_body_size = ft_stoi(valueLine);
     }
     else if (line->find("error_page") == 0)
     {
-        error_pages = true;
-        //line->substr(std::string("error_page").length());
+        valueLine = line->substr(std::string("error_page").length());
     }
-
+    //std::cout << "line: "<< valueLine << std::endl;
 }
 
 ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file)
@@ -175,34 +193,29 @@ ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterato
 
     //Create a serverConfig obj
     ServerConfig sc;
+
     while (brackets != 0  && (line != raw_file.end()))
     {
-        
-        //std::cout << "  " << *line <<std::endl;
-            
+        //std::cout << "  " << *line;
         // Verificar si la longitud de la línea es suficiente
-        if ((*line).size() >= prefix.size())
+        if (((*line).size() >= prefix.size()) && ((*line).substr(0, prefix.size()) == prefix))
         {
-            if ((*line).substr(0, prefix.size()) == prefix)
-            {
-                //manageLocationBracket(line, raw_file);
-                addLocation(line, raw_file);
-                brackets++;
-            }
+            addLocation(line, raw_file);
+            brackets++;
         }
         else if (*line == "}")
+        {
             brackets--;
+        }
         else
         {
             //manegar las variables sueltas
-            //manageServerBracketVar(line, listenFlag, serverNameFlag, clientMaxFlag, errorPagesFlag, sc);           
+            manageServerBracketVar(line, sc);
         }
             
         line++;
     }
 
-    // if (locationFlag == false || uploadFlag == false || cgiFlag == false || listenFlag == false || serverNameFlag == false || errorPagesFlag == false)
-    //     throw MyException("Error: Missing info inside the server");
     line--;    //volvemos atras para evaluar el }
     line--;
     std::cout << "Number of Locations in this server: " << locations.size() << std::endl;
