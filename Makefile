@@ -1,20 +1,31 @@
-# Variables
-CXX = c++
-CXXFLAGS = -std=c++98 -I./Incl
+NAME			:=	webserv
 
-# Archivos
-SRCS = Server/Server.cpp main.cpp
-OBJS = $(SRCS:.cpp=.o)
-EXEC = server
+CXX				:= c++  -std=c++98
 
-# Reglas
-all:	$(EXEC)
+INC_DIR		:= Inc/
+SRC_DIR		:= Server/
+OBJ_DIR		:= obj/
 
-$(EXEC):	$(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+SRC_FILES	:= $(wildcard $(SRC_DIR)*.cpp)
+OBJ_FILES	:= $(patsubst $(SRC_DIR)%.cpp,$(OBJ_DIR)%.o,$(SRC_FILES))
 
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+all: $(OBJ_DIR) $(NAME)
+
+$(NAME): $(OBJ_FILES) main.cpp
+	$(CXX) -I$(INC_DIR) $^ -o $@
+	printf "Compilación completada ->: [$@]\n"
+
+$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp
+	$(CXX) -I$(INC_DIR) -c $< -o $@
+    printf "Compilando ->: {$<}\n"
+
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
 clean:
-	rm -f $(OBJS) $(EXEC)
+	m -rf $(NAME)
+
+fclean: clean
+	rm -rf $(OBJ_DIR)
+
+re: fclean all
