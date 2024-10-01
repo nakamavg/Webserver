@@ -8,6 +8,7 @@
 # include <string>
 # include <stack>
 # include <sstream>
+# include <cstdlib>
 
 # include "MyException.hpp"
 
@@ -27,7 +28,7 @@ struct Locations {
     // Constructor por defecto
     Locations() 
         : id(""),
-          path(""), 
+          path(""),
           allowed_methods(), // Inicializa el vector vacío
           redirect(""), 
           autoindex(false), 

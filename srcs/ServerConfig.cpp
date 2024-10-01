@@ -1,7 +1,10 @@
 
 #include "../incs/ServerConfig.hpp"
 
-ServerConfig::ServerConfig(){}// : host(NULL), port(0), client_max_body_size(0){}
+ServerConfig::ServerConfig(){
+    port = 0;
+    client_max_body_size = 0;
+}// : host(NULL), port(0), client_max_body_size(0){}
 
 ServerConfig::ServerConfig(const ServerConfig &copy) {
     this->host = copy.host;
@@ -223,11 +226,18 @@ void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &li
     std::string valueLine;
     if (line->find("listen") == 0)
     {
-        if ((sc.port))
+        if ((sc.port != 0) || sc.host !="")
             throw MyException ("Error: duplicated listen on server");
 
         valueLine = line->substr(std::string("listen ").length());
-        sc.port = ft_stoi(valueLine);
+        size_t colonPos = valueLine.find(':');
+        if (colonPos != std::string::npos)
+        {
+            sc.host = valueLine.substr(0, colonPos);
+            sc.port = std::atoi(valueLine.substr(colonPos + 1).c_str());
+        }
+        else
+            throw MyException("Error: syntax error near the listen");
     }
     else if (line->find("server_name") == 0)
     {
@@ -239,7 +249,7 @@ void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &li
     }
     else if (line->find("client_max_body_size") == 0)
     {
-        if (sc.client_max_body_size)
+        if (sc.client_max_body_size != 0)
             throw MyException ("Error: duplicated client_max_body_size on server");
 
         valueLine = line->substr(std::string("client_max_body_size ").length());
@@ -259,10 +269,9 @@ ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterato
 
     //Create a serverConfig obj
     ServerConfig sc;
-
     while (brackets != 0  && (line != raw_file.end()))
     {
-        //std::cout << "  " << *line;
+
         // Verificar si la longitud de la línea es suficiente
         if (((*line).size() >= prefix.size()) && ((*line).substr(0, prefix.size()) == prefix))
         {
@@ -294,11 +303,11 @@ void ServerConfig::printLocation(Locations location)
 
     if (!location.path.empty())
     {
-        std::cout << "Root: " << location.path << std::endl;
+        std::cout << "  Root: " << location.path << std::endl;
     }
 
     if (!location.allowed_methods.empty()) {
-        std::cout << "Allowed Methods: ";
+        std::cout << "  Allowed Methods: ";
         for (size_t i = 0; i < location.allowed_methods.size(); ++i) {
             std::cout << location.allowed_methods[i];
             if (i < location.allowed_methods.size() - 1) {
@@ -309,31 +318,31 @@ void ServerConfig::printLocation(Locations location)
     }
 
     if (!location.redirect.empty()) {
-        std::cout << "Redirect: " << location.redirect << std::endl;
+        std::cout << "  Redirect: " << location.redirect << std::endl;
     }
 
-    std::cout << "Autoindex: " << (location.autoindex ? "Enabled" : "Disabled") << std::endl;
+    std::cout << "  Autoindex: " << (location.autoindex ? "Enabled" : "Disabled") << std::endl;
 
     if (!location.index.empty()) {
-        std::cout << "Index: " << location.index << std::endl;
+        std::cout << "  Index: " << location.index << std::endl;
     }
 
     if (!location.default_file.empty()) {
-        std::cout << "Default File: " << location.default_file << std::endl;
+        std::cout << "  Default File: " << location.default_file << std::endl;
     }
 
     if (!location.upload_dir.empty()) {
-        std::cout << "Upload Directory: " << location.upload_dir << std::endl;
+        std::cout << "  Upload Directory: " << location.upload_dir << std::endl;
     }
 
-    std::cout << "Upload Enable: " << (location.upload_enable ? "Enabled" : "Disabled") << std::endl;
+    std::cout << "  Upload Enable: " << (location.upload_enable ? "Enabled" : "Disabled") << std::endl;
 
     if (!location.path_info.empty()) {
-        std::cout << "Path Info: " << location.path_info << std::endl;
+        std::cout << "  Path Info: " << location.path_info << std::endl;
     }
 
     if (!location.cgi_extension.empty()) {
-        std::cout << "CGI Extension: " << location.cgi_extension << std::endl;
+        std::cout << "  CGI Extension: " << location.cgi_extension << std::endl;
     }
     std::cout << std::endl;
 }
