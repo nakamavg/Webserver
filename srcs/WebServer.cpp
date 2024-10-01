@@ -82,9 +82,9 @@ void WebServer::parseFile()
                 serverFlag = true;
                 brackets++;
 
+                ServerConfig sc = sc.manageServerBracket(++line, raw_file);
                 //devuelve una configuracion de servidor y la guardamos
-                ServerConfig sc; //temporal serverconfig
-                serverConfigs.push_back(sc.manageServerBracket(++line, raw_file));
+                serverConfigs.push_back(sc);
             }
             else
                 throw MyException("Error: Server nested");
@@ -100,4 +100,5 @@ void WebServer::parseFile()
     }
     if (brackets !=0)
         throw MyException("Error: Check the brackets!");
+    
 }
