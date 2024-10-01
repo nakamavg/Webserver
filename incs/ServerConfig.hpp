@@ -31,7 +31,7 @@ struct Locations {
           allowed_methods(), // Inicializa el vector vacío
           redirect(""), 
           autoindex(false), 
-          index(""), 
+          index(""),
           default_file(""), 
           upload_dir(""), 
           upload_enable(false), 
@@ -54,7 +54,11 @@ class ServerConfig
         void manageServerBracketVar(std::vector<std::string>::iterator &line, ServerConfig &sc);
 
         void addLocation(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
-        
+
+        void printLocation(Locations location);
+        void printServerConfig(ServerConfig sc);
+        std::vector<std::string> parseMethods(const std::string& input);
+
         // Getter y Setter para host
         std::string getHost() const { return host; }
         void setHost(const std::string &newHost) { host = newHost; }

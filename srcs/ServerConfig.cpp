@@ -61,7 +61,10 @@ void ServerConfig::addLocation(std::vector<std::string>::iterator &line, std::ve
     // Aquí usas `loc.path` como clave para el mapa
     //std::cout << "Adding location: " << loc.id << std::endl; // Debug output
 
+    if (locations.size() == 0)
+        loc.id = "Default";
     locations[loc.id] = loc; // Inserta el objeto en el mapa
+
 }
 
 Locations ServerConfig::manageLocationBracket(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file)
@@ -94,7 +97,7 @@ Locations ServerConfig::manageLocationBracket(std::vector<std::string>::iterator
                 if (!location.allowed_methods.empty())
                     throw MyException("Error: duplicated allow_methods on location");
                 std::string methods = line->substr(std::string("allow_methods ").length());
-
+                location.allowed_methods = parseMethods(methods);
             }
             else if (line->find("directory_listing") == 0)
             {
@@ -140,6 +143,12 @@ Locations ServerConfig::manageLocationBracket(std::vector<std::string>::iterator
                     throw MyException("Error: duplicated cgi_extension on location");
                 location.cgi_extension = line->substr(std::string("cgi_extension ").length());
             }
+            else if (line->find("return") == 0)
+            {
+                if (!location.redirect.empty())
+                    throw MyException ("Error: duplicated return on location");
+                location.redirect = line->substr(std::string("return ").length());
+            }
             else
             {
                 throw MyException("Error: Syntax error on location");
@@ -150,6 +159,63 @@ Locations ServerConfig::manageLocationBracket(std::vector<std::string>::iterator
     line--; // Retroceder para evaluar el }
     line--;
     return location;
+}
+
+std::vector<std::string> ServerConfig::parseMethods(const std::string& input)
+{
+    std::vector<std::string> allowedMethods;
+    std::vector<std::string> result;
+    std::string word;
+
+    allowedMethods.push_back("GET");
+    allowedMethods.push_back("POST");
+    allowedMethods.push_back("DELETE");
+
+    std::istringstream stream(input);
+
+    while (stream >> word)
+    {
+        if (!word.empty() && word[word.length() - 1] == ';')
+        {
+            word = word.substr(0, word.length() - 1);
+        }
+
+        bool isAllowed = false;
+        for (size_t i = 0; i < allowedMethods.size(); ++i)
+        {
+            if (word == allowedMethods[i])
+            {
+                isAllowed = true;
+                break;
+            }
+        }
+        
+        if (isAllowed == false)
+            throw MyException("Error: Not allowed method found");
+
+        for (size_t i = 0; i < allowedMethods.size(); ++i)
+        {
+            if (word == allowedMethods[i])
+            {
+                bool exists = false;
+                for (size_t j = 0; j < result.size(); ++j)
+                {
+                    if (result[j] == word)
+                    {
+                        exists = true;
+                        throw MyException("Error: Duplicated method");
+                    }
+                }
+                if (!exists)
+                {
+                    result.push_back(word);
+                }
+                break;
+            }
+        }
+    }
+
+    return result;
 }
 
 void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &line, ServerConfig &sc)
@@ -218,6 +284,97 @@ ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterato
 
     line--;    //volvemos atras para evaluar el }
     line--;
-    std::cout << "Number of Locations in this server: " << locations.size() << std::endl;
+    //std::cout << "Number of Locations in this server: " << locations.size() << std::endl;
     return sc;
+}
+
+void ServerConfig::printLocation(Locations location)
+{
+    std::cout << "Location ID: " << location.id << std::endl;
+
+    if (!location.path.empty())
+    {
+        std::cout << "Root: " << location.path << std::endl;
+    }
+
+    if (!location.allowed_methods.empty()) {
+        std::cout << "Allowed Methods: ";
+        for (size_t i = 0; i < location.allowed_methods.size(); ++i) {
+            std::cout << location.allowed_methods[i];
+            if (i < location.allowed_methods.size() - 1) {
+                std::cout << ", ";
+            }
+        }
+        std::cout << std::endl;
+    }
+
+    if (!location.redirect.empty()) {
+        std::cout << "Redirect: " << location.redirect << std::endl;
+    }
+
+    std::cout << "Autoindex: " << (location.autoindex ? "Enabled" : "Disabled") << std::endl;
+
+    if (!location.index.empty()) {
+        std::cout << "Index: " << location.index << std::endl;
+    }
+
+    if (!location.default_file.empty()) {
+        std::cout << "Default File: " << location.default_file << std::endl;
+    }
+
+    if (!location.upload_dir.empty()) {
+        std::cout << "Upload Directory: " << location.upload_dir << std::endl;
+    }
+
+    std::cout << "Upload Enable: " << (location.upload_enable ? "Enabled" : "Disabled") << std::endl;
+
+    if (!location.path_info.empty()) {
+        std::cout << "Path Info: " << location.path_info << std::endl;
+    }
+
+    if (!location.cgi_extension.empty()) {
+        std::cout << "CGI Extension: " << location.cgi_extension << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+void ServerConfig::printServerConfig(ServerConfig sc)
+{
+    std::cout << "Host: " << sc.host << std::endl;
+    std::cout << "Port: " << sc.port << std::endl;
+
+    if(!sc.server_names.empty())
+    {
+        for (size_t i = 0; i < sc.server_names.size(); ++i)
+        {
+            std::cout << sc.server_names[i];
+            if (i < sc.server_names.size() - 1)
+            {
+                std::cout << ", ";
+            }
+        }
+        std::cout << std::endl;
+    }
+
+    if (sc.client_max_body_size)
+        std::cout << "CMBS: " << sc.client_max_body_size << std::endl;
+    
+    if(!sc.error_pages.empty())
+    {
+        for (size_t i = 0; i < sc.error_pages.size(); ++i)
+        {
+            std::cout << sc.error_pages[i];
+            if (i < sc.error_pages.size() - 1)
+            {
+                std::cout << ", ";
+            }
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << std::endl;
+    for (std::map<std::string, Locations>::iterator it = locations.begin(); it != locations.end(); ++it)
+    {
+        printLocation(it->second);
+    }
 }
