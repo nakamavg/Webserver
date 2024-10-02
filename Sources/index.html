@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Web Simple</title>
+    </style>
+</head>
+<style>
+    body{
+        background-image: url(https://letraslibres.com/wp-content/uploads/2022/08/urss.jpg);
+    }
+    a{
+        background-color: white;
+        border-radius: 5px;
+        padding: 3px;
+        border-color: 1px black;
+        
+    }
+    a:hover{
+        background-color: red;
+    }
+</style>
+<body>
+    <center>
+        <h1>Bienvenido a la Pagina de los hermanos dalton</h1>
+        <p>Esta es una página web básica creada con HTML.</p>
+        <p>Antton , Endika y David</p>
+        <p><a href="http://localhost:8080">Click here to go to /cgi</a></p>
+        <p><a href="http://localhost:8080/cgi.html">Click here to go to /tests</a></p>
+        <p><a href="/GET">Click here to go to /GET</a></p>
+		<form action ="http://localhost:8080" method="post">
+			<label for="name">Nombre:</label>
+			<input type="text" id="name" name="name" required></input>
+			<label for="lastname">Apellidos:</label>
+
+			<input type="text" id="lastname" name="lastname" required></input>
+            <label for="photo">Foto:</label>
+            <input type="file" id="photo" name="photo"></input>
+			<button type="submit">Enviar</button>
+		</form>
+    </center>      
+    </div>
+</body>
+</html>

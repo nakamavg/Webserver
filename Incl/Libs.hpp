@@ -14,3 +14,6 @@
 #include "../Server/ServerUp.hpp"
 #include <vector>
 #include <map>
+#include <fstream>
+#define END_LINE "\r\n"
+std::string ft_read(std::string filename);

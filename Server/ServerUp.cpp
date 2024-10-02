@@ -162,11 +162,11 @@ void ServerUp::start()
 	int			fdac;
 	int			i;
 	int			client_fd;
-	char		buffer[1024];
+	char		buffer[99999];
 	size_t		bytesRead;
 	epoll_event	ev;
-	epoll_event	*evento_actual;
 	epoll_event	clients;
+	std::string html =ft_read("Sources/index.html");
 
 
 	std::map<int, sockaddr_in> se;
@@ -213,23 +213,25 @@ void ServerUp::start()
 			for(int n = 0;n < fdac; n++)
 			{
 				if(int fdconnect = checkfd(evClient[n].data.fd))
-				{
+				{	
 					std::cout << fdconnect << std::endl;
 					 newConect(fdconnect,epoll_fd);
-					 std::cout << "despues del accept"<<std::endl;;
+					 std::cout << "despues del accept"<<std::endl;
+					 break;
 				}
-				else
+				if(evClient[n].events & EPOLLIN)
 				{
-				
-
+                int nRead = read(evClient[n].data.fd, buffer, 999999);
+                buffer[nRead] = '\0';
+                std::string b = buffer;
+				std::cout << b << std::endl;
+				std::cout << html << std::endl;
 						// Procesar los datos recibidos del cliente
-						std::string response = "HTTP/1.1 200 OK\r\n"
-												"Content-Type: text/html\r\n"
-												"Content-Length: "
-												"50"
-												"\r\n"
-												"\r\n"
-												"<h1>patata</h1><br>patatabaja</br>\r\n";
+						std::string response =
+					"HTTP/1.1 200 OK\r\n"
+					"Content-Type: text/html\r\n"
+					"Content-Length: " + std::to_string(html.size()) + "\r\n"
+					"\r\n" + html.c_str() ;
 						send(evClient[n].data.fd, response.c_str(), response.size(), 0);
 						close(evClient[n].data.fd);
 				}
@@ -247,56 +249,3 @@ ServerUp::~ServerUp()
 	std::cout << "manolo";
 }
 
-/*
-		std::cout << "despues del wait" << std::endl;
-		for (int i = 0; i < fdac; i++)
-		{
-			evento_actual = &evClient[i];
-
-			if (evento_actual->events | EPOLLIN)
-			{
-				std::vector<int>::iterator it = std::find(vSockets.begin(),
-						vSockets.end(), evento_actual->data.fd);
-
-				if (it != vSockets.end())
-				{
-
-					client_fd = accept(*it, NULL, NULL);
-					if (client_fd < 0)
-					{
-
-						if (errno != EAGAIN && errno != EWOULDBLOCK)
-							std::cerr << "Accept error\n";
-						continue ;
-					}
-					clients.data.fd = client_fd;
-					clients.events = EPOLLIN | EPOLLET;
-					vEvents.push_back(clients);
-					if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd,
-							&vEvents.back()) == -1)
-					{
-						perror("Client side: ");
-						close(client_fd);
-					}
-					break ;
-				}
-			}
-			for (std::vector<epoll_event>::iterator it = vEvents.begin(); it < vEvents.end(); it++)
-			{
-				if (it->events | EPOLLIN)
-				{
-					bytesRead = read(it->data.fd, buffer, sizeof(buffer) - 1);
-					if (bytesRead < 1)
-					{
-						// Manejar error de lectura
-						std::cerr << "Error reading from client\n";
-						// Aquí entra el manejo del cliente
-						// Leer datos del cliente
-						std::cout << "antes de leer el mensaje" << std::endl;
-					}
-
-						if (client_fd > 0)
-							close(client_fd);
-				}
-			}
-*/

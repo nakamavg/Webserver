@@ -1,6 +1,6 @@
 NAME			:=	webserv
 
-CXX				:= c++  -std=c++98
+CXX				:= c++  
 
 INC_DIR		:= Inc/
 SRC_DIR		:= Server/
