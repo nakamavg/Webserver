@@ -1,16 +1,7 @@
 #ifndef SERVERCONFIG_HPP
 # define SERVERCONFIG_HPP
 
-# include <iostream>
-# include <fstream>
-# include <vector>
-# include <map>
-# include <string>
-# include <stack>
-# include <sstream>
-# include <cstdlib>
-
-# include "MyException.hpp"
+# include "WebServer.hpp"
 
 struct Locations {
     std::string id;                             //Identificador del location
@@ -39,6 +30,7 @@ struct Locations {
           path_info(""), 
           cgi_extension("") {} // Puedes usar el inicializador para strings
 };
+class WebServer;
 
 class ServerConfig
 {
@@ -49,16 +41,15 @@ class ServerConfig
         ServerConfig &operator=(const ServerConfig &src);
 
         ServerConfig manageServerBracket(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
-        
-        Locations manageLocationBracket(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
-
         void manageServerBracketVar(std::vector<std::string>::iterator &line, ServerConfig &sc);
+
+        Locations manageLocationBracket(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
+        void manageLocationBracketVar(std::vector<std::string>::iterator line, Locations &location);
 
         void addLocation(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
 
         void printLocation(Locations location);
         void printServerConfig(ServerConfig sc);
-        std::vector<std::string> parseMethods(const std::string& input);
 
         // Getter y Setter para host
         std::string getHost() const { return host; }

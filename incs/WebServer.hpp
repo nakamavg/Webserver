@@ -7,10 +7,14 @@
 # include <map>
 # include <string>
 # include <stack>
+# include <sstream>
+# include <cstdlib>
 
 # include "MyException.hpp"
 # include "ServerConfig.hpp"
+# include "ParseUtils.hpp"
 
+class ServerConfig;
 class WebServer
 {
     public:

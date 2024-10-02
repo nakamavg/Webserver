@@ -1,12 +1,14 @@
 
 #include "../incs/ServerConfig.hpp"
 
-ServerConfig::ServerConfig(){
+ServerConfig::ServerConfig()
+{
     port = 0;
     client_max_body_size = 0;
 }// : host(NULL), port(0), client_max_body_size(0){}
 
-ServerConfig::ServerConfig(const ServerConfig &copy) {
+ServerConfig::ServerConfig(const ServerConfig &copy)
+{
     this->host = copy.host;
     this->port = copy.port;
     this->server_names = copy.server_names;
@@ -15,10 +17,13 @@ ServerConfig::ServerConfig(const ServerConfig &copy) {
     this->locations = copy.locations;
 }
 
-ServerConfig::~ServerConfig(){}
+ServerConfig::~ServerConfig()
+{}
 
-ServerConfig &ServerConfig::operator=(const ServerConfig &src) {
-    if (this != &src) {
+ServerConfig &ServerConfig::operator=(const ServerConfig &src)
+{
+    if (this != &src)
+    {
         this->host = src.host;
         this->port = src.port;
         this->server_names = src.server_names;
@@ -29,34 +34,8 @@ ServerConfig &ServerConfig::operator=(const ServerConfig &src) {
     return *this;
 }
 
-int ft_stoi(std::string str)
-{
-    int number;
 
-    std::stringstream ss(str);
 
-    ss >> number;
-
-    if (ss.fail())
-    {
-        throw MyException ("Error: Couldn't format string into int");
-    }
-
-    return number;
-}
-
-std::string trimLeadingSpaces(const std::string& str) {
-    // Encuentra el primer carácter que no sea espacio (' ') ni tabulación ('\t')
-    std::size_t start = str.find_first_not_of(" \t");
-
-    // Si encuentra un carácter que no sea espacio ni tabulación
-    if (start != std::string::npos) {
-        return str.substr(start);
-    }
-
-    // Si la cadena está vacía o solo tiene espacios/tabulaciones, retorna una cadena vacía
-    return "";
-}
 
 void ServerConfig::addLocation(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file)
 {
@@ -77,19 +56,24 @@ Locations ServerConfig::manageLocationBracket(std::vector<std::string>::iterator
 
     std::string newLine = line->substr(std::string("location /").length());
     location.id = std::string(newLine, 0, newLine.find_first_of(" "));
-    //std::cout << "      Location encontrado: ->" << location.id << "<-" << std::endl;
-
     line++;
     while (brackets != 0 && (line != raw_file.end()))
     {
         //std::cout << "      " << *line << std::endl;
         if (*line == "}")
-        {
             brackets--;
-        }
         else
-        {
-            if (line->find("root") == 0)
+            manageLocationBracketVar(line, location);
+        line++;
+    }
+    line--; // Retroceder para evaluar el }
+    line--;
+    return location;
+}
+
+void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator line, Locations &location)
+{
+    if (line->find("root") == 0)
             {
                 if (location.path != "")
                     throw MyException("Error: duplicated root on location");
@@ -156,110 +140,6 @@ Locations ServerConfig::manageLocationBracket(std::vector<std::string>::iterator
             {
                 throw MyException("Error: Syntax error on location");
             }
-        }
-        line++;
-    }
-    line--; // Retroceder para evaluar el }
-    line--;
-    return location;
-}
-
-std::vector<std::string> ServerConfig::parseMethods(const std::string& input)
-{
-    std::vector<std::string> allowedMethods;
-    std::vector<std::string> result;
-    std::string word;
-
-    allowedMethods.push_back("GET");
-    allowedMethods.push_back("POST");
-    allowedMethods.push_back("DELETE");
-
-    std::istringstream stream(input);
-
-    while (stream >> word)
-    {
-        if (!word.empty() && word[word.length() - 1] == ';')
-        {
-            word = word.substr(0, word.length() - 1);
-        }
-
-        bool isAllowed = false;
-        for (size_t i = 0; i < allowedMethods.size(); ++i)
-        {
-            if (word == allowedMethods[i])
-            {
-                isAllowed = true;
-                break;
-            }
-        }
-        
-        if (isAllowed == false)
-            throw MyException("Error: Not allowed method found");
-
-        for (size_t i = 0; i < allowedMethods.size(); ++i)
-        {
-            if (word == allowedMethods[i])
-            {
-                bool exists = false;
-                for (size_t j = 0; j < result.size(); ++j)
-                {
-                    if (result[j] == word)
-                    {
-                        exists = true;
-                        throw MyException("Error: Duplicated method");
-                    }
-                }
-                if (!exists)
-                {
-                    result.push_back(word);
-                }
-                break;
-            }
-        }
-    }
-
-    return result;
-}
-
-void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &line, ServerConfig &sc)
-{
-    std::string valueLine;
-    if (line->find("listen") == 0)
-    {
-        if ((sc.port != 0) || sc.host !="")
-            throw MyException ("Error: duplicated listen on server");
-
-        valueLine = line->substr(std::string("listen ").length());
-        size_t colonPos = valueLine.find(':');
-        if (colonPos != std::string::npos)
-        {
-            sc.host = valueLine.substr(0, colonPos);
-            sc.port = std::atoi(valueLine.substr(colonPos + 1).c_str());
-        }
-        else
-            throw MyException("Error: syntax error near the listen");
-    }
-    else if (line->find("server_name") == 0)
-    {
-        if (!(sc.server_names).empty())
-            throw MyException ("Error: duplicated server_name on server");
-
-        valueLine = line->substr(std::string("server_name ").length());
-        sc.server_names.push_back(valueLine);
-    }
-    else if (line->find("client_max_body_size") == 0)
-    {
-        if (sc.client_max_body_size != 0)
-            throw MyException ("Error: duplicated client_max_body_size on server");
-
-        valueLine = line->substr(std::string("client_max_body_size ").length());
-        sc.client_max_body_size = ft_stoi(valueLine);
-    }
-    else if (line->find("error_page") == 0)
-    {
-        valueLine = line->substr(std::string("error_page").length());
-    }
-    //std::cout << "line: "<< valueLine << std::endl;
 }
 
 ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file)
@@ -294,9 +174,48 @@ ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterato
     line--;    //volvemos atras para evaluar el }
     line--;
     //std::cout << "Number of Locations in this server: " << locations.size() << std::endl;
+    if (sc.port == 0 && sc.host.empty())
+        throw MyException("Error: Missing info to be able to open the server");
     return sc;
 }
 
+void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &line, ServerConfig &sc)
+{
+    std::string valueLine;
+    if (line->find("listen") == 0)
+    {
+        if ((sc.port != 0) || sc.host !="")
+            throw MyException ("Error: duplicated listen on server");
+
+        valueLine = line->substr(std::string("listen ").length());
+        parseIpAddress(valueLine, sc);
+    }
+    else if (line->find("server_name") == 0)
+    {
+        if (!(sc.server_names).empty())
+            throw MyException ("Error: duplicated server_name on server");
+
+        valueLine = line->substr(std::string("server_name ").length());
+        sc.server_names.push_back(valueLine);
+    }
+    else if (line->find("client_max_body_size") == 0)
+    {
+        if (sc.client_max_body_size != 0)
+            throw MyException ("Error: duplicated client_max_body_size on server");
+
+        valueLine = line->substr(std::string("client_max_body_size ").length());
+        sc.client_max_body_size = ft_stoi(valueLine);
+    }
+    else if (line->find("error_page") == 0)
+    {
+        valueLine = line->substr(std::string("error_page").length());
+    }
+}
+
+
+
+
+//----------------PRINTEOS----------------
 void ServerConfig::printLocation(Locations location)
 {
     std::cout << "Location ID: " << location.id << std::endl;
