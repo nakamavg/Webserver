@@ -37,7 +37,9 @@ void WebServer::selectLine (const std::string &line)
     if (!trimmedLine.empty())
     {
         char lastChar = trimmedLine[trimmedLine.size() - 1];
-        if (lastChar == '{' || lastChar == '}' || lastChar == ';')
+        char prevChar = trimmedLine[trimmedLine.size() - 2];
+
+        if ((lastChar == '{' && prevChar == ' ') || lastChar == '}' || lastChar == ';')
             raw_file.push_back(trimmedLine);
         else
         {

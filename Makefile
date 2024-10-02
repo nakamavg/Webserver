@@ -5,6 +5,7 @@ NAME = testeo
 
 SRCS = srcs/ServerConfig.cpp\
 	   srcs/WebServer.cpp\
+	   srcs/ParseUtils.cpp\
 	   main.cpp
 OBJS = $(SRCS:.cpp=.o)
 

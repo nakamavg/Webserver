@@ -40,7 +40,7 @@ ServerConfig &ServerConfig::operator=(const ServerConfig &src)
 void ServerConfig::addLocation(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file)
 {
     Locations loc = manageLocationBracket(line, raw_file);
-    // Aquí usas `loc.path` como clave para el mapa
+    // Aquí usas `loc.id` como clave para el mapa
     //std::cout << "Adding location: " << loc.id << std::endl; // Debug output
 
     if (locations.size() == 0)
@@ -149,9 +149,9 @@ ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterato
 
     //Create a serverConfig obj
     ServerConfig sc;
+
     while (brackets != 0  && (line != raw_file.end()))
     {
-
         // Verificar si la longitud de la línea es suficiente
         if (((*line).size() >= prefix.size()) && ((*line).substr(0, prefix.size()) == prefix))
         {
