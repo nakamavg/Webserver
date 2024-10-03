@@ -1,6 +1,6 @@
 #include "../incs/WebServer.hpp"
 
-void WebServer::validFileName(const std::string& fileName)
+void    WebServer::validFileName(const std::string& fileName)
 {
     if (fileName.size() < 5 || fileName.substr(fileName.size() - 5) != ".conf")
         throw MyException("Error: Config file Extension not found");
@@ -12,7 +12,7 @@ void WebServer::validFileName(const std::string& fileName)
         throw MyException("Error: File not found in the config folder");
 }
 
-void WebServer::selectLine (const std::string &line)
+void    WebServer::selectLine (const std::string &line)
 {
     size_t start = 0;
 
@@ -48,7 +48,8 @@ void WebServer::selectLine (const std::string &line)
     }
 }
 
-void WebServer::readConfFile(const std::string& fileName)
+
+void    WebServer::readConfFile(const std::string& fileName)
 {
     const std::string fullPath = "config/" + fileName;
 
@@ -65,7 +66,7 @@ void WebServer::readConfFile(const std::string& fileName)
 
 }
 
-void WebServer::parseFile()
+void    WebServer::parseFile()
 {
     bool serverFlag = false;
     int brackets = 0;
@@ -106,7 +107,7 @@ void WebServer::parseFile()
     int i = 1;
     for (std::vector<ServerConfig>::iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
     {
-        std::cout << "------ Server " << i++ << "  ------"<< std::endl;
+        std::cout << "\033[32m" << "------ Server " << i++ << "  ------" << "\033[0m" << std::endl;
        (*it).printServerConfig((*it));
     }
 }

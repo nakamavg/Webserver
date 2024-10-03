@@ -204,7 +204,7 @@ void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &li
             throw MyException ("Error: duplicated client_max_body_size on server");
 
         valueLine = line->substr(std::string("client_max_body_size ").length());
-        sc.client_max_body_size = ft_stoi(valueLine);
+        parseCmbs(valueLine, sc);
     }
     else if (line->find("error_page") == 0)
     {
@@ -268,11 +268,13 @@ void ServerConfig::printLocation(Locations location)
 
 void ServerConfig::printServerConfig(ServerConfig sc)
 {
+    std::cout << std::endl;
     std::cout << "Host: " << sc.host << std::endl;
     std::cout << "Port: " << sc.port << std::endl;
 
     if(!sc.server_names.empty())
     {
+        std::cout << "Server Names: ";
         for (size_t i = 0; i < sc.server_names.size(); ++i)
         {
             std::cout << sc.server_names[i];
