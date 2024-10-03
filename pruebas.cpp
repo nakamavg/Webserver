@@ -6,7 +6,7 @@
 /*   By: anurtiag <anurtiag@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/03 13:06:03 by anurtiag          #+#    #+#             */
-/*   Updated: 2024/10/02 13:13:02 by anurtiag         ###   ########.fr       */
+/*   Updated: 2024/10/03 12:14:44 by anurtiag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,56 @@
 // 	}
 // 	outfile << text;
 // 	return(true);
+
+
+
+// bool GetParsing(std::string request)
+// {
+//     size_t mpos = request.find("GET");
+//     size_t spos = request.find("HTTP/1.1");
+    
+//     if(mpos != std::string::npos && spos != std::string::npos)
+//     {
+//         std::cout << "valid method \n";
+//         return(true);
+//     }
+//     else
+//         std::cout << "invalid method\n";
+//     return(false);
+// }
+
+// bool ParseFLine(std::string fline)
+// {
+//     size_t mpos = fline.find("GET");
+//     size_t spos = fline.find("HTTP/1.1");
+//     if(mpos == std::string::npos)
+//     {
+//         std::cerr << "invalid method\n";
+//         return (false);
+//     }
+//     else if(spos == std::string::npos)
+//     {
+//         std::cerr << "invalid standard\n";
+//         return (false);
+//     }
+// }
+
+// bool ParseSLine(std::string fline)
+// {
+    
+// }
+
+// bool GetParsing(std::string request)// de esto se podria hacer clase padre, habra que mirarlo
+// {
+//     if(request.empty() == true)
+//         return(true);
+//     size_t npos = request.find("\n");
+//     std::string fline = request.substr(0, npos + 1);
+//     request.erase(0, npos + 1);
+//     npos = request.find("\n");
+//     std::string sline = request.substr(0, npos + 1);
+//     std::cout << fline << sline << "garbanzo" << std::endl;
+//     return(false);
 // }
 
 std::string ft_read(std::string filename)
