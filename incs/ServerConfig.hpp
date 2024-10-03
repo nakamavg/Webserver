@@ -78,7 +78,7 @@ class ServerConfig
     private:
         // Configuración general del servidor
         std::string host;                               // Nombre del servidor para el manejo de virtual hosts
-        int port;                                       // Define el puerto en el que el servidor escuchará conexiones
+        size_t port;                                       // Define el puerto en el que el servidor escuchará conexiones
         std::vector<std::string> server_names;          // Nombres de dominio aceptados
         size_t client_max_body_size;                    // Tamaño máximo del cuerpo de la solicitud
         std::map<int, std::string> error_pages;         // Páginas de error por defecto (código -> archivo)

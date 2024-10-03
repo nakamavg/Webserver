@@ -1,5 +1,5 @@
 CC = c++
-CFLAGS = -Wall -Wextra -Werror -std=c++98 
+CFLAGS =  
 RM = rm -rf
 NAME = testeo
 
@@ -7,6 +7,7 @@ SRCS = srcs/ServerConfig.cpp\
 	   srcs/WebServer.cpp\
 	   srcs/ParseUtils.cpp\
 	   srcs/ParseRequest.cpp\
+	   srcs/ServerUp.cpp\
 	   main.cpp
 OBJS = $(SRCS:.cpp=.o)
 
