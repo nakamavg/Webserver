@@ -3,6 +3,7 @@
 #include "serverlist.hpp"
 #include <vector>
 #include <map>
+#include "Cgi.hpp"
 #define MAX_EVENTS 64
 class serverlist;
 class ServerUp {

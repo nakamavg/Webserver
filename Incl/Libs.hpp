@@ -15,5 +15,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <unistd.h>
+#include <sys/wait.h>
 #define END_LINE "\r\n"
 std::string ft_read(std::string filename);
