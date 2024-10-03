@@ -167,7 +167,7 @@ void ServerUp::start()
 	size_t		bytesRead;
 	epoll_event	ev;
 	epoll_event	clients;
-	std::string html =ft_read("html/rgb.html");
+	std::string html =ft_read("html/post.html");
 
 
 	std::map<int, sockaddr_in> se;
