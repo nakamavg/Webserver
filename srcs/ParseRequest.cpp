@@ -6,11 +6,11 @@
 /*   By: anurtiag <anurtiag@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:12:44 by anurtiag          #+#    #+#             */
-/*   Updated: 2024/10/02 11:27:57 by anurtiag         ###   ########.fr       */
+/*   Updated: 2024/10/03 12:25:26 by anurtiag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ParseRequest.hpp"
+#include "../incs/ParseRequest.hpp"
 
 std::string ft_read(std::string filename)
 {
@@ -58,12 +58,12 @@ ParseRequest::ParseRequest(std::string _raw_request)
 
 ParseRequest::~ParseRequest() {}
 
-ParseRequest::ParseRequest(const ParseRequest& source) {}
+ParseRequest::ParseRequest(const ParseRequest& source) {(void)source;}
 
-ParseRequest& ParseRequest::operator=(const ParseRequest& source)
-{
-    return(*this);
-}
+// ParseRequest& ParseRequest::operator=(const ParseRequest& source)
+// {
+//     return(*this);
+// }
 
 void ParseRequest::RequestMethod()
 {
