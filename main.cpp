@@ -13,6 +13,7 @@ int main(int argc, char **argv)
             ws.validFileName(argv[1]);
             ws.readConfFile(argv[1]);
             ws.parseFile();
+            std::cout << "\033[32m" << "OK" << "\033[0m" << std::endl;
             ServerUp a(ws.getServerConfigs());
             a.start();
             

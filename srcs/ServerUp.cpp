@@ -31,10 +31,10 @@ bool ServerUp::setupServerSocket(int serverSocket,
 	int	option;
 
 	option = 1;
-	std::cout << "en setupserverSocket" << std::endl;
-	std::cout << serverSocket << std::endl;
-	std::cout << serverAddress.sin_family << std::endl;
-	std::cout << serverAddress.sin_port << std::endl;
+	//std::cout << "en setupserverSocket" << std::endl;
+	//std::cout << serverSocket << std::endl;
+	//std::cout << serverAddress.sin_family << std::endl;
+	//std::cout << serverAddress.sin_port << std::endl;
 	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
 			&option, sizeof(option)) < 0)
 	{
@@ -89,7 +89,7 @@ void ServerUp::newConect(int serverfd, int fdEpoll)
 		exit(6);
 		if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
 		{
-				std::cout << "we already processed all incoming connections" << std::endl;
+				//std::cout << "we already processed all incoming connections" << std::endl;
 		}
 		else
 		{
@@ -118,17 +118,18 @@ ServerUp::ServerUp(const std::vector<ServerConfig> &raw) : nServers(0), list(raw
 {
 	size_t	nserv;
 
-	std::cout << "pepe" << std::endl;
+	//std::cout << "pepe" << std::endl;
 	nserv = 0;
 	std::vector<ServerConfig>::iterator pailan = list.begin();
 	while (pailan != list.end())
 	{
 		std::cout << (*pailan).getHost() << std::endl;
 		std::cout << (*pailan++).getPort() << std::endl;
+		std::cout << std::endl;
 		nserv++;
 	}
 	this->nServers = nserv;
-	std::cout << nServers << std::endl;
+	//std::cout << nServers << std::endl;
 }
 std::vector<int> ServerUp::get_SocketsOfServer()
 {
@@ -137,7 +138,7 @@ std::vector<int> ServerUp::get_SocketsOfServer()
 
 	std::vector<int> sockets;
 	i = 1;
-	std::cout << this->nServers << std::endl;
+	//std::cout << this->nServers << std::endl;
 	while (i <= this->nServers)
 	{
 		if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -145,11 +146,11 @@ std::vector<int> ServerUp::get_SocketsOfServer()
 			std::cerr << errno << std::endl;
 			continue ;
 		} 
-		std::cout << serverSocket << std::endl;
+		//std::cout << serverSocket << std::endl;
 		sockets.push_back(serverSocket);
 		i++;
 	}
-	std::cout << "no salgo de esta funcion" << std::endl;
+	//std::cout << "no salgo de esta funcion" << std::endl;
 	return (sockets);
 }
 
@@ -166,7 +167,7 @@ void ServerUp::start()
 	size_t		bytesRead;
 	epoll_event	ev;
 	epoll_event	clients;
-	std::string html =ft_read("html/index.html");
+	std::string html =ft_read("html/rgb.html");
 
 
 	std::map<int, sockaddr_in> se;
@@ -181,7 +182,7 @@ void ServerUp::start()
 		perror("");
 		return ;
 	}
-	std::cout << "antes del for" << std::endl;
+	//std::cout << "antes del for" << std::endl;
 	for (std::vector<int>::iterator it = vSockets.begin(); it != vSockets.end(); ++it)
 	{
 		if (!setupServerSocket(*it, se[*it]))
@@ -196,27 +197,27 @@ void ServerUp::start()
 			close(*it);
 			continue ;
 		}
-		std::cout << "patata" << std::endl;
+		//std::cout << "patata" << std::endl;
 	}
 	// estructura para los eventos de conexiones de clientes
 	while (42)
 	{
 		// devuelve el numero de fds que han sido actualizados
-		std::cout << "antes del epoll wait" << std::endl;
+		//std::cout << "antes del epoll wait" << std::endl;
 		fdac = epoll_wait(epoll_fd, evClient, MAX_EVENTS, -1);
 		if (fdac == -1)
 		{
 			perror("epoll_wait failed");
 			return ;
 		}
-		std::cout << "despues del wait" << std::endl;
+		//std::cout << "despues del wait" << std::endl;
 			for(int n = 0;n < fdac; n++)
 			{
 				if(int fdconnect = checkfd(evClient[n].data.fd))
 				{	
-					std::cout << fdconnect << std::endl;
+					//std::cout << fdconnect << std::endl;
 					 newConect(fdconnect,epoll_fd);
-					 std::cout << "despues del accept"<<std::endl;
+					 //std::cout << "despues del accept"<<std::endl;
 					 break;
 				}
 				if(evClient[n].events & EPOLLIN)
@@ -224,8 +225,8 @@ void ServerUp::start()
                 int nRead = read(evClient[n].data.fd, buffer, 999999);
                 buffer[nRead] = '\0';
                 std::string b = buffer;
-				std::cout << b << std::endl;
-				std::cout << html << std::endl;
+				//std::cout << b << std::endl;
+				//std::cout << html << std::endl;
 						// Procesar los datos recibidos del cliente
 						std::string response =
 					"HTTP/1.1 200 OK\r\n"
@@ -246,6 +247,6 @@ ServerUp::ServerUp()
 
 ServerUp::~ServerUp()
 {
-	std::cout << "manolo";
+	//std::cout << "manolo";
 }
 
