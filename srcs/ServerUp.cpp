@@ -164,6 +164,7 @@ void ServerUp::start()
 	int			client_fd;
 	char		buffer[99999];
 	size_t		bytesRead;
+	bool		isCgi= true;
 	epoll_event	ev;
 	epoll_event	clients;
 	std::string html =ft_read("html/index.html");
@@ -221,6 +222,9 @@ void ServerUp::start()
 				}
 				if(evClient[n].events & EPOLLIN)
 				{
+					if(isCgi)
+						
+
                 int nRead = read(evClient[n].data.fd, buffer, 999999);
                 buffer[nRead] = '\0';
                 std::string b = buffer;
