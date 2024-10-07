@@ -222,8 +222,6 @@ void ServerUp::start()
 				}
 				if(evClient[n].events & EPOLLIN)
 				{
-					if(isCgi)
-						
 
                 int nRead = read(evClient[n].data.fd, buffer, 999999);
                 buffer[nRead] = '\0';
@@ -236,8 +234,14 @@ void ServerUp::start()
 					"Content-Type: text/html\r\n"
 					"Content-Length: " + std::to_string(html.size()) + "\r\n"
 					"\r\n" + html.c_str() ;
-						send(evClient[n].data.fd, response.c_str(), response.size(), 0);
-						close(evClient[n].data.fd);
+					if(true)
+						{
+							Cgi a("cgi/hy.py","manolo pepe",evClient[n].data.fd);
+							html = a.handlerCgi();
+							std::cout << html << "\n";
+						}
+				send(evClient[n].data.fd, response.c_str(), response.size(), 0);
+				close(evClient[n].data.fd);
 				}
 			}
 		

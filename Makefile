@@ -8,6 +8,7 @@ SRCS = srcs/ServerConfig.cpp\
 	   srcs/ParseUtils.cpp\
 	   srcs/ParseRequest.cpp\
 	   srcs/ServerUp.cpp\
+	   srcs/Cgi.cpp\
 	   main.cpp
 OBJS = $(SRCS:.cpp=.o)
 

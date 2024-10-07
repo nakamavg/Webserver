@@ -18,4 +18,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #define END_LINE "\r\n"
+#define READ 0
+#define WRITE 1
+
 std::string ft_read(std::string filename);
