@@ -216,6 +216,10 @@ void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &li
     {
         valueLine = line->substr(std::string("error_page").length());
     }
+    else
+    {
+        throw MyException ("Error: Syntax error");
+    }
 }
 
 

@@ -14,12 +14,12 @@ RM = rm -rf
 NAME		=	webserv
 
 #Ficheros
-SRC_FILES= ServerConfig\
-	   WebServer\
-	   ParseUtils\
-	   ParseRequest\
-	   ServerUp\
-	   main
+SRC_FILES=	ServerConfig\
+	   		WebServer\
+	   		ParseUtils\
+	   		ParseRequest\
+	   		ServerUp\
+	   		main
 SRC			=	$(addprefix $(SRC_DIR), $(addsuffix .c, $(SRC_FILES)))
 OBJ			=	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_FILES)))
 
