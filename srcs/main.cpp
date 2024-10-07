@@ -1,5 +1,5 @@
-#include "incs/WebServer.hpp"
-#include "incs/ServerUp.hpp"
+#include "../incs/WebServer.hpp"
+#include "../incs/ServerUp.hpp"
 
 int main(int argc, char **argv)
 {
