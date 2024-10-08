@@ -13,6 +13,7 @@ RM = rm -rf
 #Nombre ejecutable
 NAME		=	webserv
 
+CONF		=	default.conf
 #Ficheros
 SRC_FILES=	ServerConfig\
 	   		WebServer\
@@ -55,3 +56,7 @@ fclean: clean
 	@echo "$(RED)EXECUTABLE CLEANED!$(NC)"
 
 re: fclean all
+
+run : re
+	@clear
+	./$(NAME) $(CONF)

@@ -15,6 +15,7 @@ public:
 	void start();
 	void stop();
 	size_t getNservers();
+	std::vector<ServerConfig>& GetList();
 private:
 	std::string ip;
 	size_t port;
@@ -26,8 +27,6 @@ private:
 	bool setupServerSocket(int serverSocket, const sockaddr_in& serverAddress);
 	void newConect(int fd, int fdepoll);
 	int checkfd(int fd);
-
-
 
 
 };

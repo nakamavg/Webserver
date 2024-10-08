@@ -6,7 +6,7 @@
 /*   By: anurtiag <anurtiag@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 13:39:11 by anurtiag          #+#    #+#             */
-/*   Updated: 2024/10/01 11:14:20 by anurtiag         ###   ########.fr       */
+/*   Updated: 2024/10/08 17:19:33 by anurtiag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,11 @@
 # include <fstream>
 
 # include "MyException.hpp"
+# include "ServerUp.hpp"
 
 # define ENDLINE "\r\n"
+
+class WebServer;
 
 class ParseRequest
 {
@@ -28,13 +31,17 @@ class ParseRequest
         std::string _method;
         std::string _route;
         std::string _version;
+        std::string _rLine;
+        std::string _rHeader;
+        std::string _rBody;
         size_t      _lenght;
+        ServerConfig*   _conf;
     public:
-        ParseRequest(std::string _raw_request);
+        ParseRequest(std::string _raw_request, std::vector<ServerConfig> &list);
         ParseRequest(const ParseRequest& source);
         ParseRequest& operator=(const ParseRequest& source);
         ~ParseRequest();
-        void RequestMethod();
+        void ParseLine();
         void ParseHead();
         void ParseBody();
 };

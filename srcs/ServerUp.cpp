@@ -114,6 +114,11 @@ size_t ServerUp::getNservers()
 	return (this->nServers);
 }
 
+std::vector<ServerConfig>& ServerUp::GetList()
+{
+	return(this->list);
+}
+
 ServerUp::ServerUp(const std::vector<ServerConfig> &raw) : nServers(0), list(raw)
 {
 	size_t	nserv;
@@ -225,6 +230,7 @@ void ServerUp::start()
                 int nRead = read(evClient[n].data.fd, buffer, 999999);
                 buffer[nRead] = '\0';
                 std::string b = buffer;
+				ParseRequest request(b, this->GetList());
 				//std::cout << b << std::endl;
 				//std::cout << html << std::endl;
 						// Procesar los datos recibidos del cliente
