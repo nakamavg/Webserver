@@ -3,7 +3,7 @@
 class Cgi {
 public:
 	// Constructor
-	Cgi(std::string _programName, std::string _queryString, int _clientFd);
+	Cgi(std::string _programName, std::string _queryString);
 
 	// Destructor
 	~Cgi() {}
@@ -14,6 +14,5 @@ public:
 private:
 	std::string programName;
 	std::string queryString;
-	int clientFd;
 	std::string output;
 };

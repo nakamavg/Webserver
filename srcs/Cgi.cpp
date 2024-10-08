@@ -1,6 +1,6 @@
 #include "../incs/Cgi.hpp"
 
-Cgi::Cgi(std::string _programName, std::string _queryString, int _clientFd) : programName(_programName), queryString(_queryString),clientFd(_clientFd)
+Cgi::Cgi(std::string _programName, std::string _queryString) : programName(_programName), queryString(_queryString)
 {}
 std::string & Cgi::get_output(){return this->output ;}
 

@@ -85,7 +85,8 @@ void    WebServer::parseFile()
                 serverFlag = true;
                 brackets++;
 
-                ServerConfig sc = sc.manageServerBracket(++line, raw_file);
+                ServerConfig sc ;
+                sc = sc.manageServerBracket(++line, raw_file);
                 //devuelve una configuracion de servidor y la guardamos
                 serverConfigs.push_back(sc);
             }

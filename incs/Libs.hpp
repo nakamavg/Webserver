@@ -17,6 +17,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sstream>
 #define END_LINE "\r\n"
 #define READ 0
 #define WRITE 1

@@ -63,7 +63,7 @@ recorriendo el array de clases de los servidores
 void ServerUp::GenStruct(std::map<int, sockaddr_in> *servers,
 	std::vector<int> *sockets)
 {
-	int			i;
+	size_t			i;
 	sockaddr_in	serverAddress;
 
 	i = 0;
@@ -132,7 +132,7 @@ ServerUp::ServerUp(const std::vector<ServerConfig> &raw) : nServers(0), list(raw
 }
 std::vector<int> ServerUp::get_SocketsOfServer()
 {
-	int	i;
+	size_t	i;
 	int	serverSocket;
 
 	std::vector<int> sockets;
@@ -155,19 +155,12 @@ std::vector<int> ServerUp::get_SocketsOfServer()
 
 void ServerUp::start()
 {
-	int			serverSocket;
-	int			option;
 	int			epoll_fd;
 	epoll_event	evClient[MAX_EVENTS];
 	int			fdac;
-	int			i;
-	int			client_fd;
 	char		buffer[99999];
-	size_t		bytesRead;
 	std::string response;
-	bool		isCgi= true;
 	epoll_event	ev;
-	epoll_event	clients;
 	std::string html =ft_read("html/index.html");
 
 
@@ -232,7 +225,7 @@ void ServerUp::start()
 						// Procesar los datos recibidos del cliente
 					if(true)
 						{
-							Cgi a("cgi/a.out","manolo pepe",evClient[n].data.fd);
+							Cgi a("cgi/a.out","manolo pepe");
 							a.handlerCgi();
 							std::cout << a.get_output()<< "\n";
 							response=Response(a.get_output()).get_web();
