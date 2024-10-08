@@ -164,6 +164,7 @@ void ServerUp::start()
 	int			client_fd;
 	char		buffer[99999];
 	size_t		bytesRead;
+	std::string response;
 	bool		isCgi= true;
 	epoll_event	ev;
 	epoll_event	clients;
@@ -229,16 +230,13 @@ void ServerUp::start()
 				std::cout << b << std::endl;
 				std::cout << html << std::endl;
 						// Procesar los datos recibidos del cliente
-						std::string response =
-					"HTTP/1.1 200 OK\r\n"
-					"Content-Type: text/html\r\n"
-					"Content-Length: " + std::to_string(html.size()) + "\r\n"
-					"\r\n" + html.c_str() ;
 					if(true)
 						{
-							Cgi a("cgi/hy.py","manolo pepe",evClient[n].data.fd);
-							html = a.handlerCgi();
-							std::cout << html << "\n";
+							Cgi a("cgi/a.out","manolo pepe",evClient[n].data.fd);
+							a.handlerCgi();
+							std::cout << a.get_output()<< "\n";
+							response=Response(a.get_output()).get_web();
+
 						}
 				send(evClient[n].data.fd, response.c_str(), response.size(), 0);
 				close(evClient[n].data.fd);

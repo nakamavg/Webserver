@@ -2,8 +2,9 @@
 
 Cgi::Cgi(std::string _programName, std::string _queryString, int _clientFd) : programName(_programName), queryString(_queryString),clientFd(_clientFd)
 {}
+std::string & Cgi::get_output(){return this->output ;}
 
-std::string &Cgi::handlerCgi()
+void Cgi::handlerCgi()
 {
     int fdaux[2];
     pipe(fdaux);
@@ -13,8 +14,12 @@ std::string &Cgi::handlerCgi()
     if (pid == 0) 
     {
         char *argv[4];
-        argv[0] = strdup("/usr/bin/python3");
-        argv[1] = strdup("/sgoinfre/students/dgomez-m/webserverdeverdadelabuena/cgi/hy.py"); 
+                std::cout <<"el nombre de l programa es : " << programName <<std::endl;
+        if(programName.find(".py") != std::string::npos)
+            argv[0] = strdup("/usr/bin/python3");
+        else
+            argv[0] = strdup(programName.c_str());
+        argv[1] = strdup(programName.c_str()); 
         argv[2] = NULL;
 
         std::string query_string_env = "QUERY_STRING=" + queryString;
@@ -40,18 +45,17 @@ std::string &Cgi::handlerCgi()
         if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
         {
             std::cerr << "El proceso hijo terminó con un error.\n";
+            output=ft_read("html/html400.html");
         }
+        else{
         int nread=read(fdaux[READ],&buffer ,sizeof(buffer));
         buffer[nread] = '\0';
-        std::string manolo(buffer);
-
-        
-        return(manolo);
+        std::string aux(buffer);
+        output = aux;
+        }
     }
     else
     {
-        std::string puta = "puta";
         std::cerr << "Fork falló.\n";
-        return (puta);
     }
 }

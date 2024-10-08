@@ -1,6 +1,6 @@
 print("<html>")
 print("<head>")
-print("<title>CGI Form Example</title>")
+print("<title>CGI De Los Hermanos DAlton</title>")
 print("<style>")
 print("body {")
 print("    background-color: #f0f0f0;")  # Light gray background color
