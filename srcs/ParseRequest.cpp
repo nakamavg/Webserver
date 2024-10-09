@@ -6,7 +6,7 @@
 /*   By: anurtiag <anurtiag@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:12:44 by anurtiag          #+#    #+#             */
-/*   Updated: 2024/10/09 12:21:18 by anurtiag         ###   ########.fr       */
+/*   Updated: 2024/10/09 13:25:06 by anurtiag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,16 @@ void ParseRequest::ParseLine()
 		std::cout << "EL STRING DEL MAPA ES: " << it->first << std::endl;
 }
 
-// void ParseRequest::ParseHead()
-// {
+void ParseRequest::ParseHead()
+{
 
-// }
+}
+
+void ParseRequest::HasChunked()
+{
+	size_t newline = _rBody.find(END_LINE);
+	std::string line = _rBody.substr(0, newline);
+	std::string other = _rBody.substr(newline, _rBody.size() - newline + 4);
+	size_t charnbr = _rBody.
+	
+}
