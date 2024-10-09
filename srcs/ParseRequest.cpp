@@ -6,7 +6,7 @@
 /*   By: anurtiag <anurtiag@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:12:44 by anurtiag          #+#    #+#             */
-/*   Updated: 2024/10/08 17:26:00 by anurtiag         ###   ########.fr       */
+/*   Updated: 2024/10/09 12:21:18 by anurtiag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ ParseRequest::ParseRequest(std::string _raw_request, std::vector<ServerConfig> &
 		else
 			std::cout << "HOST " << (*it).getHost() << "PUERTO " << (*it).getPort() << std::endl;
 	}
+	std::cout << "ya en el conf " << _conf->getHost() << _conf->getPort() << std::endl;
 	// _method = _raw_request.substr(0, _method_end);
 	// _route = _raw_request.substr((_method_end + 1), _route_end - _method_end - 1);
 	// _version = _raw_request.substr((_route_end + 1), _line_end - _route_end - 1);
@@ -85,7 +86,6 @@ ParseRequest::ParseRequest(std::string _raw_request, std::vector<ServerConfig> &
     //     throw MyException("Error 501: Not implemented");
 	// if(_version != "HTTP/1.1")
     //     throw MyException("Error 505: HTTP Version Not Supported");
-	
 	this->ParseLine();
 }
 
@@ -109,7 +109,10 @@ void ParseRequest::ParseLine()
 	_route = other.substr(0, _route_end);
 	_version = other.substr(_route_end + 1);
 	std::cout << "METODO " << _method << std::endl << "RUTA " << _route << std::endl << "VERSION " << _version << std::endl;
-
+	if(_method != "GET" && _method == "POST" && _method == "DELETE")
+    	throw MyException("Error 501: Not implemented");	
+	for(std::map<std::string, Locations>::iterator it = _conf->getLocations().begin(); it != _conf->getLocations().begin(); it++)
+		std::cout << "EL STRING DEL MAPA ES: " << it->first << std::endl;
 }
 
 // void ParseRequest::ParseHead()
