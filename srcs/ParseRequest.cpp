@@ -6,7 +6,7 @@
 /*   By: anurtiag <anurtiag@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 10:12:44 by anurtiag          #+#    #+#             */
-/*   Updated: 2024/10/09 13:25:06 by anurtiag         ###   ########.fr       */
+/*   Updated: 2024/10/09 13:50:45 by anurtiag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,9 +110,11 @@ void ParseRequest::ParseLine()
 	_version = other.substr(_route_end + 1);
 	std::cout << "METODO " << _method << std::endl << "RUTA " << _route << std::endl << "VERSION " << _version << std::endl;
 	if(_method != "GET" && _method == "POST" && _method == "DELETE")
-    	throw MyException("Error 501: Not implemented");	
-	for(std::map<std::string, Locations>::iterator it = _conf->getLocations().begin(); it != _conf->getLocations().begin(); it++)
+    	throw MyException("Error 501: Not implemented");
+	const std::map<std::string, Locations>& map = _conf->getLocations();
+	for(std::map<std::string, Locations>::const_iterator it = map.begin(); it != map.end(); it++)
 		std::cout << "EL STRING DEL MAPA ES: " << it->first << std::endl;
+
 }
 
 void ParseRequest::ParseHead()
@@ -120,11 +122,11 @@ void ParseRequest::ParseHead()
 
 }
 
-void ParseRequest::HasChunked()
-{
-	size_t newline = _rBody.find(END_LINE);
-	std::string line = _rBody.substr(0, newline);
-	std::string other = _rBody.substr(newline, _rBody.size() - newline + 4);
-	size_t charnbr = _rBody.
+// void ParseRequest::HasChunked()
+// {
+// 	size_t newline = _rBody.find(END_LINE);
+// 	std::string line = _rBody.substr(0, newline);
+// 	std::string other = _rBody.substr(newline, _rBody.size() - newline + 4);
+// 	size_t charnbr = _rBody.
 	
-}
+// }
