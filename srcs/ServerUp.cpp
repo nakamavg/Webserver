@@ -158,7 +158,7 @@ void ServerUp::start()
 	int			epoll_fd;
 	epoll_event	evClient[MAX_EVENTS];
 	int			fdac;
-	char		buffer[99999];
+	//char		buffer[99999];
 	std::string response;
 	epoll_event	ev;
 	std::string html =ft_read("html/index.html");
@@ -219,21 +219,26 @@ void ServerUp::start()
 					//---
 					//Modificar la recepcion y lectura de peticiones
 					//---
-					int nRead = read(evClient[n].data.fd, buffer, 99999);
+					
+					std::string	request;
+
+					request = readHttpRequest(evClient[n].data.fd);
+					
+					/*int nRead = read(evClient[n].data.fd, buffer, 99999);
 					buffer[nRead] = '\0';
 					std::string b = buffer;
 					std::cout << b << std::endl;
-					std::cout << html << std::endl;
+					std::cout << html << std::endl;*/
 
 					//----------------------------
 					//Pruebas de parseo de request y checkeo
 
-					if (checkRequest(b))
+					if (checkRequest(request))
 					{
-						ParseRequest	request(b);
+						ParseRequest	req(request);
 
 						int error = 0;
-						if ((error = request.checkProt()) != 0)
+						if ((error = req.checkProt()) != 0)
 						{
 							//request error
 						}
@@ -249,19 +254,32 @@ void ServerUp::start()
 						//{
 							//methods
 						//}
+
+						//else
+							//if ()
+								//redir
+							Response	response;
+							std::cout << req.getMethod() << "123\n";
+							if (req.getMethod() == "GET")
+								response.metodGet(evClient[n].data.fd, req);//falta location
+							else if (req.getMethod() == "POST")
+								response.metodPost(evClient[n].data.fd, req);
+							else if (req.getMethod() == "DELETE")
+								response.metodDelete(evClient[n].data.fd, req);
+						std::cout << "--------------" << "\n";
 					}
 					//-----------------------------
 
 						// Procesar los datos recibidos del cliente
-					if(true)
+					/*if(true)
 						{
 							Cgi a("cgi/a.out","manolo pepe");
 							a.handlerCgi();
 							std::cout << a.get_output()<< "\n";
-							response=Response(a.get_output()).get_web();
+							//response=Response(a.get_output()).get_web();
 
 						}
-				send(evClient[n].data.fd, response.c_str(), response.size(), 0);
+				send(evClient[n].data.fd, response.c_str(), response.size(), 0);*/
 				close(evClient[n].data.fd);
 				}
 			}
@@ -269,7 +287,7 @@ void ServerUp::start()
 	}
 }
 
-/*std::string	ServerUp::readHttpRequest(int socket)
+std::string	ServerUp::readHttpRequest(int socket)
 {
 	char		buff[MAX_REQUEST_SIZE + 1];
 	std::string	request;
@@ -283,18 +301,6 @@ void ServerUp::start()
 	}
 	return "";
 }
-
-bool	ServerUp::client_request(Client & client)
-{
-	client.setTime(time(NULL));
-
-	std::string	request = readHttpRequest(client.getSock());
-
-	std::cout << "New Request" << std::endl;
-	client.setReqSize(request.size());
-	client.setLastReq(request);
-	return true;
-}*/
 
 
 ServerUp::ServerUp()

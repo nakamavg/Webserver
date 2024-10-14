@@ -7,6 +7,11 @@
 #include "Response.hpp"
 #include "Cgi.hpp"
 #define MAX_EVENTS 64
+
+
+#define MAX_REQUEST_SIZE 1024
+
+
 class WebServer;
 class ServerUp {
 public:
@@ -31,6 +36,7 @@ private:
 	int checkfd(int fd);
 
 
+	std::string	readHttpRequest( int socket );
 
 
 };

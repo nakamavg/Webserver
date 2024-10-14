@@ -1,5 +1,5 @@
-#ifndef PARSEREQUEST_HPP
-# define PARSEREQUEST_HPP
+#ifndef _PARSEREQUEST_HPP_
+# define _PARSEREQUEST_HPP_
 
 # include <iostream>
 # include <string>

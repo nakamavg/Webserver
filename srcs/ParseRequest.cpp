@@ -371,10 +371,10 @@ size_t	ParseRequest::getLength(void)
 	return _length;
 }
 
-/*std::string	ParseRequest::getBoundary(void)
+std::string	ParseRequest::getBoundary(void)
 {
 	return _boundary;
-}*/
+}
 
 std::string	ParseRequest::getBody(void)
 {
