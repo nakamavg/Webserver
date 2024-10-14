@@ -21,6 +21,7 @@ class ParseRequest
         std::string     _route;
         std::string     _version;
         std::string     _cgi_body;
+        std::string     _boundary;
 
         std::map<std::string, std::string>     _rHeader;
         std::string                            _rLine;
@@ -55,7 +56,7 @@ class ParseRequest
 		std::string		getProtocol( void );
 		size_t			getLength( void );
 
-		//std::string		getBoundary( void );//
+		std::string		getBoundary( void );
 		std::string		getBody( void );
 		std::map<std::string, std::string>		getHeader( void );
 
@@ -67,5 +68,8 @@ class ParseRequest
 };
 
 std::string ft_read(std::string filename);
+
+bool    checkRequest( std::string request );
+bool	checkMethod(std::string method, std::vector<std::string> allowed_methods);
 
 #endif

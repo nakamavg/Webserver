@@ -131,6 +131,46 @@ void ParseParseRequest::ParseHead()
 	
 // }
 
+bool	checkRequest(std::string request)
+{
+	int		sizeBody = request.size() - (request.find("\r\n\r\n") + 4);
+	
+	if (!request.find("\r\n\r\n"))
+		return false;
+	if (request.find("Transfer-Encoding: chunked") != std::string::npos)
+	{
+		if (!request.find("0\r\n\r\n"))
+			return false;
+		return true;
+	}
+	else if(request.find("Content-Length") != std::string::npos)
+	{
+		std::string content = request;
+		content.erase(0, content.find("Content-Length") + 16);
+		if (!content.find("\r\n"))
+			return false;
+		content.erase(content.find("\r\n"), content.size());
+
+		if (std::atoi(content.c_str()) > sizeBody)
+			return false;
+		if (request.find("boundary=") != std::string::npos)
+		{
+			if (request.find("--"))
+				return true;
+			return false;
+		}
+	}
+	return true;
+}
+
+bool	checkMethod(std::string method, std::vector<std::string> allowed_methods)
+{
+	for (size_t i = 0; i < allowed_methods.size(); i++)
+		if (allowed_methods[i] == method)
+			return true;
+	return false;
+}
+
 ParseRequest::ParseRequest(void)
 {}
 
@@ -163,16 +203,16 @@ ParseRequest::ParseRequest(const ParseRequest &source)
 
 ParseRequest	&ParseRequest::operator=(const ParseRequest &source)
 {
-	_request = source._request;
 	_method = source._method;
 	_route = source._route;
 	_version = source._version;
+	_cgi_body = source._cgi_body;
+	_boundary = source._boundary;
+	_length = source._length;
 
+	_request = source._request;
 	_rHeader = source._rHeader;
 	_rBody = source._rBody;
-
-	_cgi_body = source._cgi_body;
-	_length = source._length;
 
 	return *this;
 }
@@ -226,13 +266,14 @@ void	ParseRequest::makePost(std::stringstream &strs)
 	std::string	line;
 	std::string	key;
 	std::string buff;
+	std::string full_body;
 	size_t pos = _request.find("\r\n\r\n");
 
 	while (strs >> token)
 	{
-		/*if (token.find("boundary=") != std::string::npos)
-			_boundary = token.substr(token.find("boundary=") + 9);*/
-		if (token == "Content-Length:")
+		if (token.find("boundary=") != std::string::npos)
+			_boundary = token.substr(token.find("boundary=") + 9);
+		else if (token == "Content-Length:")
 		{
 			if (!key.empty() && !line.empty() && key != token)
 			{
@@ -262,9 +303,11 @@ void	ParseRequest::makePost(std::stringstream &strs)
 			size_t pos_rHeader = pos;
 			while (pos < _length + pos_rHeader && pos < _request.size())
 			{
-				_rBody += _request[pos];
+				full_body += _request[pos];
 				pos++;
 			}
+			if (_boundary.empty())
+				_rBody = full_body;
 			break;
 		}
 		else if (token[token.size() - 1] == ':')
@@ -298,7 +341,7 @@ int		ParseRequest::checkProt(void)
 		return 405;
 	if (_version != "HTTP/1.1")
 		return 505;
-	return -1;
+	return 0;
 }
 
 

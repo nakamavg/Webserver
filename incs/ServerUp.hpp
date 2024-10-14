@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include "WebServer.hpp"
+#include "ParseRequest.hpp"
 #include "Response.hpp"
 #include "Cgi.hpp"
 #define MAX_EVENTS 64

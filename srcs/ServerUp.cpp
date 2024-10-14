@@ -216,12 +216,42 @@ void ServerUp::start()
 				}
 				if(evClient[n].events & EPOLLIN)
 				{
+					//---
+					//Modificar la recepcion y lectura de peticiones
+					//---
+					int nRead = read(evClient[n].data.fd, buffer, 99999);
+					buffer[nRead] = '\0';
+					std::string b = buffer;
+					std::cout << b << std::endl;
+					std::cout << html << std::endl;
 
-                int nRead = read(evClient[n].data.fd, buffer, 999999);
-                buffer[nRead] = '\0';
-                std::string b = buffer;
-				std::cout << b << std::endl;
-				std::cout << html << std::endl;
+					//----------------------------
+					//Pruebas de parseo de request y checkeo
+
+					if (checkRequest(b))
+					{
+						ParseRequest	request(b);
+
+						int error = 0;
+						if ((error = request.checkProt()) != 0)
+						{
+							//request error
+						}
+						//Error por tamaño de request
+						//if (request.getLength() != std::string::npos && request.getLength() > ???)
+							//request error
+						
+						//---
+						//Location + Cgi
+						//---
+
+						//else
+						//{
+							//methods
+						//}
+					}
+					//-----------------------------
+
 						// Procesar los datos recibidos del cliente
 					if(true)
 						{
@@ -238,6 +268,34 @@ void ServerUp::start()
 		
 	}
 }
+
+/*std::string	ServerUp::readHttpRequest(int socket)
+{
+	char		buff[MAX_REQUEST_SIZE + 1];
+	std::string	request;
+	size_t		bytes;
+
+	while ((bytes = recv(socket, buff, MAX_REQUEST_SIZE, 0)) > 0)
+	{
+		request += buff;
+		if (request.find("\r\n\r\n") != std::string::npos)
+			return request;
+	}
+	return "";
+}
+
+bool	ServerUp::client_request(Client & client)
+{
+	client.setTime(time(NULL));
+
+	std::string	request = readHttpRequest(client.getSock());
+
+	std::cout << "New Request" << std::endl;
+	client.setReqSize(request.size());
+	client.setLastReq(request);
+	return true;
+}*/
+
 
 ServerUp::ServerUp()
 {
