@@ -39,14 +39,16 @@ class Response
 		Response( void );
 		~Response( void );
 
-		void	sendPage( std::string page, int socket, std::string request, int error );
-		void	sendError( int error, int socket );
-		void	sendChuncked( std::string, int socket, int error );
+		void	sendPage( std::string page, epoll_event & client, std::string request, int error );
+		void	sendError( int error, epoll_event & client );
+		void	sendChuncked( std::string, epoll_event & client, int error );
+		bool	writePost( std::string path, epoll_event & client, std::string str );
+
 
 	//METHODS
-		void	metodGet(int socket, ParseRequest & request);
-		void	metodPost(int socket, ParseRequest & request);
-		void	metodDelete(int socket, ParseRequest & request);
+		void	metodGet( epoll_event & client, ParseRequest & request);
+		void	metodPost( epoll_event & client, ParseRequest & request);
+		void	metodDelete( epoll_event & client, ParseRequest & request);
 
 	//GETTERS
 		std::string	findType( std::string page );

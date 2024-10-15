@@ -30,7 +30,7 @@ Response::Response(void)
 Response::~Response(void)
 {}
 
-void	Response::sendPage(std::string page, int socket, std::string request, int error)
+void	Response::sendPage(std::string page, epoll_event & client, std::string request, int error)
 {
 	std::cout << "Show Page: " << page << std::endl;
 
@@ -40,22 +40,22 @@ void	Response::sendPage(std::string page, int socket, std::string request, int e
 		msg += _errors[error];
 		msg += "\n\n";
 		size_t i;
-		if ((i = send(socket, msg.c_str(), msg.size(), 0)) <= 0)
-			sendError(500, socket);
+		if ((i = send(client.data.fd, msg.c_str(), msg.size(), 0)) <= 0)
+			sendError(500, client);
 		return ;
 	}
 	else
 	{
 		if (request.find("Transfer-Encoding: chunked") != std::string::npos)
 		{
-			sendChuncked(page, socket, error);
+			sendChuncked(page, client, error);
 			return ;
 		}
 		std::ifstream fd(page.c_str());
 	
 		if (!fd.is_open())
 		{
-			sendError(404, socket);
+			sendError(404, client);
 			return;
 		}
 
@@ -74,8 +74,8 @@ void	Response::sendPage(std::string page, int socket, std::string request, int e
 		msg += "\n\n";
 
 		size_t i;
-		if ((i = send(socket, msg.c_str(), msg.size(), 0)) <= 0) {
-			sendError(500, socket);
+		if ((i = send(client.data.fd, msg.c_str(), msg.size(), 0)) <= 0) {
+			sendError(500, client);
 			return;
 		}
 
@@ -86,13 +86,13 @@ void	Response::sendPage(std::string page, int socket, std::string request, int e
 			fd.read(buffer, bytes_to_read);
 			if (fd.eof() && fd.fail())
 			{
-				sendError(500, socket);
+				sendError(500, client);
 				return;
 			}
 			size_t n;
-			if ((n = send(socket, buffer, fd.gcount(), MSG_NOSIGNAL)) <= 0)
+			if ((n = send(client.data.fd, buffer, fd.gcount(), MSG_NOSIGNAL)) <= 0)
 			{
-				sendError(500, socket);
+				sendError(500, client);
 				return;
 			}
 			size -= n;
@@ -101,7 +101,7 @@ void	Response::sendPage(std::string page, int socket, std::string request, int e
 	}
 }
 
-void	Response::sendError(int error, int socket)
+void	Response::sendError(int error, epoll_event & client)
 {
 	std::map<std::string, std::string> errorPages;
 	int fd;
@@ -116,12 +116,12 @@ void	Response::sendError(int error, int socket)
 		{
 			std::cout << "Error: Error pages failed -> " << error << std::endl;
 			errorPages.erase(errorPages.find(ft_size_to_str(error)));
-			sendError(error, socket);
+			sendError(error, client);
 			return;
 		}
 		close(fd);
 		//raiz del servidor
-		sendPage("html" + '/' + errorPages[ft_size_to_str(error)], socket, "", 200);
+		sendPage("html" + '/' + errorPages[ft_size_to_str(error)], client, "", 200);
 	}
 	else
 	{
@@ -137,7 +137,7 @@ void	Response::sendError(int error, int socket)
 			msg += "\n\n";
 			msg += _errors[error] + "\n";
 
-			i = send(socket, msg.c_str(), msg.length(), 0);
+			i = send(client.data.fd, msg.c_str(), msg.length(), 0);
 			if (i < 0)
 				std::cout << "Client disconnected" << std::endl;
 			else if (i == 0)
@@ -146,14 +146,14 @@ void	Response::sendError(int error, int socket)
 	}
 }
 
-void	Response::sendChuncked(std::string page, int socket, int error)
+void	Response::sendChuncked(std::string page, epoll_event & client, int error)
 {
 	std::cout << "Show Chuncked Page: " << page << std::endl;
 
 	std::ifstream	fd(page.c_str());
 	if (!fd.is_open())
 	{
-		sendError(404, socket);
+		sendError(404, client);
 		return;
 	}
 
@@ -166,9 +166,9 @@ void	Response::sendChuncked(std::string page, int socket, int error)
 	header += "\r\n\r\n";
 
 	size_t i;
-	if ((i = send(socket, header.c_str(), header.size(), 0)) <= 0)
+	if ((i = send(client.data.fd, header.c_str(), header.size(), 0)) <= 0)
 	{
-		sendError(500, socket);
+		sendError(500, client);
 		fd.close();
 		return;
 	}
@@ -186,35 +186,49 @@ void	Response::sendChuncked(std::string page, int socket, int error)
 			ss << std::hex << size;
 			std::string msg = ss.str() + "\r\n";
 
-			if ((i = send(socket, msg.c_str(), msg.size(), 0)) <= 0)
+			msg = msg + buff + "\r\n";
+			if ((i = send(client.data.fd, msg.c_str(), msg.size(), 0)) <= 0)
 			{
-				sendError(500, socket);
+				sendError(500, client);
 				fd.close();
-				return;
-			}
-			if ((i = send(socket, buff, size, 0)) <= 0)
-			{
-				sendError(500, socket);
-				fd.close();
-				return;
-			}
-			if ((i = send(socket, "\r\n", 2, 0)) <= 0)
-			{
-				sendError(500, socket);
 				return;
 			}
 		}
 	}
-	if ((i = send(socket, "0\r\n\r\n", 5, 0)) <= 0)
+	if ((i = send(client.data.fd, "0\r\n\r\n", 5, 0)) <= 0)
 	{
-		sendError(500, socket);
+		sendError(500, client);
 		return;
 	}
 	fd.close();
 }
 
+bool	Response::writePost(std::string path, epoll_event & client, std::string str)
+{
+	int	fd = open(path.c_str(), O_WRONLY | O_TRUNC | O_CREAT, 0644);
+	if (fd < 0)
+	{
+		sendError(500, client);
+		return false;
+	}
+
+	//-----------
+	/*addToSet(fd, &_write_set);
+	selectFd(&_read_set, &_write_set);*/
+	//-----------
+
+	if (!write(fd, str.c_str(), str.length()))
+	{
+		sendError(500, client);
+		close(fd);
+		return false;
+	}
+	close(fd);
+	return true;
+}
+
 //METHODS
-void	Response::metodGet(int socket, ParseRequest & request)
+void	Response::metodGet(epoll_event & client, ParseRequest & request)
 {
 	std::cout << "Get Method\n";
 
@@ -223,7 +237,7 @@ void	Response::metodGet(int socket, ParseRequest & request)
 
 	if (url.size() >= 64)
 	{
-		sendError(414, socket);
+		sendError(414, client);
 		return ;
 	}
 
@@ -232,7 +246,7 @@ void	Response::metodGet(int socket, ParseRequest & request)
 
 	/*if (location && !location->getIndex().empty() && checkIndex(path, location->getIndex()))
 	{
-		sendPage(path + '/' + location->getIndex(), socket, request.getRequest(), 200);
+		sendPage(path + '/' + location->getIndex(), client, request.getRequest(), 200);
 		return ;
 	}*/
 
@@ -242,34 +256,109 @@ void	Response::metodGet(int socket, ParseRequest & request)
 
 	if (fd <= 0)
 	{
-		sendError(404, socket);
+		sendError(404, client);
 		return ;
 	}
 	if (S_ISDIR(stat_path.st_mode))
 	{	
 		//index
 		if (checkIndex(path, "index.html")/* && !location*/)
-			sendPage(path + '/' + "index.html", socket, request.getRequest(), 200);
+			sendPage(path + '/' + "index.html", client, request.getRequest(), 200);
 		/*else if (_server[client.getServ()].getListing() && location && location->getListing())
 			listing(client, url, path);*/
 		else
-			sendError(404, socket);
+			sendError(404, client);
 	}
 	else
-		sendPage(path, socket, request.getRequest(), 200);
+		sendPage(path, client, request.getRequest(), 200);
 	close(fd);
 }
 
-void	Response::metodPost(int socket, ParseRequest & request)
+void	Response::metodPost(epoll_event & client, ParseRequest & request)
 {
-	(void)socket;
-	(void)request;
+	std::cout << "Post Method\n";
+
+	//raiz del servidor
+	std::string	path = "html/" + request.getRoute();
+	struct stat	stat_path;
+	lstat(path.c_str(), &stat_path);
+
+	if (S_ISDIR(stat_path.st_mode))
+	{
+		std::string	body = request.getFullBody();
+		std::string	file;
+	
+		if (!(request.getHeader().empty() && request.getBoundary().empty()))
+		{
+			std::cout << "Post in directory: " << std::endl;
+			size_t start = 0;
+			while (true)
+			{
+				start = body.find("name=\"", start);
+				if (start == std::string::npos)
+					break;
+				start += 6;
+				size_t end = body.find("\"", start);
+				if (end == std::string::npos)
+					break;
+				std::string name = body.substr(start, end - start);
+				std::cout << "+ " + name << std::endl;
+
+				start = body.find("\r\n\r\n", end);
+				if (start == std::string::npos)
+					break;
+				start += 4;
+				end = body.find(request.getBoundary(), start);
+				if (end == std::string::npos)
+					break;
+
+				file = body.substr(start, end - start - 4);
+
+				if (!writePost(request.getRoute() + "/" + name, client, file))
+					break;
+
+				if (body[end + request.getBoundary().size()] == '-')
+					break;
+			}
+		}
+		else
+		{
+			sendError(400, client);
+			return ;
+		}
+	}
+	else
+	{
+		std::cout << "POST IN FILE\n";
+		if (!writePost(path, client, request.getFullBody()))
+			return ;
+	}
+	if (request.getLength() == 0)
+		sendPage("", client, request.getRequest(), 204);
+	else
+		sendPage("", client, request.getRequest(), 201);
 }
 
-void	Response::metodDelete(int socket, ParseRequest & request)
+void	Response::metodDelete(epoll_event & client, ParseRequest & request)
 {
-	(void)socket;
-	(void)request;
+	std::cout << "Delete Method\n";
+
+	//raiz del servidor
+	std::string	path = "html/" + request.getRoute();
+	std::ifstream	fd(path.c_str());
+	if (!fd)
+	{
+		sendError(404, client);
+		return ;
+	}
+	fd.close();
+	std::remove(path.c_str());
+
+	std::string	msg = "HTTP/1.1 200 OK\n";
+	msg += "Content-Length: 0\r\n\r\n";
+
+	if (send(client.data.fd, msg.c_str(), msg.size(), 0) <= 0)
+		sendError(500, client);
 }
 
 

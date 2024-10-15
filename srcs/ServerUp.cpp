@@ -259,13 +259,18 @@ void ServerUp::start()
 							//if ()
 								//redir
 							Response	response;
+
 							std::cout << req.getMethod() << "123\n";
+						//Evento de escritura / mensaje
+						if (evClient[n].events & EPOLLIN)
+						{
 							if (req.getMethod() == "GET")
-								response.metodGet(evClient[n].data.fd, req);//falta location
+								response.metodGet(evClient[n], req);//falta location
 							else if (req.getMethod() == "POST")
-								response.metodPost(evClient[n].data.fd, req);
+								response.metodPost(evClient[n], req);
 							else if (req.getMethod() == "DELETE")
-								response.metodDelete(evClient[n].data.fd, req);
+								response.metodDelete(evClient[n], req);
+						}
 						std::cout << "--------------" << "\n";
 					}
 					//-----------------------------

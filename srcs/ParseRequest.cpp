@@ -213,6 +213,7 @@ ParseRequest	&ParseRequest::operator=(const ParseRequest &source)
 	_request = source._request;
 	_rHeader = source._rHeader;
 	_rBody = source._rBody;
+	_full_body = source._full_body;
 
 	return *this;
 }
@@ -266,7 +267,6 @@ void	ParseRequest::makePost(std::stringstream &strs)
 	std::string	line;
 	std::string	key;
 	std::string buff;
-	std::string full_body;
 	size_t pos = _request.find("\r\n\r\n");
 
 	while (strs >> token)
@@ -303,11 +303,11 @@ void	ParseRequest::makePost(std::stringstream &strs)
 			size_t pos_rHeader = pos;
 			while (pos < _length + pos_rHeader && pos < _request.size())
 			{
-				full_body += _request[pos];
+				_full_body += _request[pos];
 				pos++;
 			}
 			if (_boundary.empty())
-				_rBody = full_body;
+				_rBody = _full_body;
 			break;
 		}
 		else if (token[token.size() - 1] == ':')
@@ -379,6 +379,11 @@ std::string	ParseRequest::getBoundary(void)
 std::string	ParseRequest::getBody(void)
 {
 	return _rBody;
+}
+
+std::string	ParseRequest::getFullBody(void)
+{
+	return _full_body;
 }
 
 std::map<std::string, std::string>	ParseRequest::getHeader(void)

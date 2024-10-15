@@ -26,6 +26,7 @@ class ParseRequest
         std::map<std::string, std::string>     _rHeader;
         std::string                            _rLine;
         std::string                            _rBody;
+        std::string                            _full_body;
         size_t                                 _length;
 
         std::string     _request;
@@ -58,6 +59,7 @@ class ParseRequest
 
 		std::string		getBoundary( void );
 		std::string		getBody( void );
+        std::string     getFullBody( void );
 		std::map<std::string, std::string>		getHeader( void );
 
         /*void ParseLine();
