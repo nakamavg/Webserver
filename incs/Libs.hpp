@@ -21,5 +21,7 @@
 #define END_LINE "\r\n"
 #define READ 0
 #define WRITE 1
+#define MAX_EVENTS 64
+#define MAX_REQUEST_SIZE 1024
 
 std::string ft_read(std::string filename);

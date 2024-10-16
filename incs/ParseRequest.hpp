@@ -41,7 +41,7 @@ class ParseRequest
 
         ParseRequest( std::string _raw_request );
         ParseRequest( const ParseRequest& source );
-        ParseRequest& operator=( const ParseRequest& source );
+        ParseRequest & operator=( const ParseRequest & source );
         ~ParseRequest( void );
 
         void    makeCgiBody( void );

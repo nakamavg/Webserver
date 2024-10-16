@@ -6,10 +6,7 @@
 #include "ParseRequest.hpp"
 #include "Response.hpp"
 #include "Cgi.hpp"
-#define MAX_EVENTS 64
 
-
-#define MAX_REQUEST_SIZE 1024
 
 
 class WebServer;
@@ -29,10 +26,11 @@ private:
 	size_t nServers;
 	std::vector<ServerConfig> list;
 	std::vector<int> vSockets;
-	void GenStruct(std::map<int, sockaddr_in> *servers, std::vector<int> *sockets);
+	std::map<int, size_t> clientVport;
+	void GenStruct(std::map<int, sockaddr_in> *servers, std::vector<int> *sockets, std::map<int,ServerConfig *> *serverPort);
 	std::vector<int> get_SocketsOfServer();
 	bool setupServerSocket(int serverSocket, const sockaddr_in& serverAddress);
-	void newConect(int fd, int fdepoll);
+	void newConect(int fd, int fdepoll,std::map<int,ServerConfig *> *serverPort,std::map<int, ServerConfig>*clientPort);
 	int checkfd(int fd);
 
 

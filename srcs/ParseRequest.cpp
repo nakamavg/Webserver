@@ -8,6 +8,7 @@ std::string ft_read(std::string filename)
 
 	if(!infile.is_open())
 	{
+		//SEND ERROR
 		throw MyException("Error 404: Not found");
 	}
 	while (std::getline(infile, line))
@@ -196,7 +197,7 @@ ParseRequest::ParseRequest(std::string _raw_request)
 		makePost(strs);
 }
 
-ParseRequest::ParseRequest(const ParseRequest &source)
+ParseRequest::ParseRequest(const ParseRequest & source)
 {
 	*this = source;
 }
@@ -329,8 +330,6 @@ void	ParseRequest::makePost(std::stringstream &strs)
 			line += token;
 		}
 	}
-
-	std::cout << "Headers:" << std::endl;
 }
 
 int		ParseRequest::checkProt(void)

@@ -18,13 +18,31 @@ std::string Response::get_web()
 }*/
 
 Response::Response(void)
+{}
+
+Response::Response(ServerConfig * conf)
 {
-    setErrors();
+	setErrors();
     _default_error = "HTTP/1.1 404 Not Found\n";
 	_default_error += "Content-Type: text/plain\n";
 	_default_error += "Content-Length: 15\n\n";
 	_default_error += "404 Not Found\n";
     setFileTypes();
+	_conf = conf;
+}
+
+Response::Response(const Response & source)
+{
+	*this = source;
+}
+
+Response	&Response::operator=(const Response & source)
+{
+	_default_error = source._default_error;
+	_errors = source._errors;
+	_fileTypes = source._fileTypes;
+	_conf = source._conf;
+	return *this;
 }
 
 Response::~Response(void)
@@ -212,11 +230,6 @@ bool	Response::writePost(std::string path, epoll_event & client, std::string str
 		return false;
 	}
 
-	//-----------
-	/*addToSet(fd, &_write_set);
-	selectFd(&_read_set, &_write_set);*/
-	//-----------
-
 	if (!write(fd, str.c_str(), str.length()))
 	{
 		sendError(500, client);
@@ -242,7 +255,19 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	}
 
 	//raiz del server
-	std::string	path = "html/" + url;
+	const std::map<std::string, Locations>& map = _conf->getLocations();
+	for(std::map<std::string, Locations>::const_iterator it = map.begin(); it != map.end(); it++)
+		std::cout << "EL STRING DEL MAPA ES: " << it->first << std::endl;
+
+	struct Locations *loc = NULL;
+	loc = &_conf->getLocations().find("Default")->second;
+	if (loc == NULL)
+	{
+		std::cout << "123\n";
+		loc = &_conf->getLocations()["Default"];
+	}
+	std::string	path = loc->path;
+	std::cout << "123 - " << path << "\n";
 
 	/*if (location && !location->getIndex().empty() && checkIndex(path, location->getIndex()))
 	{
@@ -290,7 +315,9 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 	
 		if (!(request.getHeader().empty() && request.getBoundary().empty()))
 		{
+
 			std::cout << "Post in directory: " << std::endl;
+
 			size_t start = 0;
 			while (true)
 			{
@@ -329,7 +356,9 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 	}
 	else
 	{
+
 		std::cout << "POST IN FILE\n";
+
 		if (!writePost(path, client, request.getFullBody()))
 			return ;
 	}

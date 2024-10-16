@@ -5,6 +5,7 @@
 
 # include "Libs.hpp"
 # include "../incs/ParseRequest.hpp"
+# include "../incs/ServerConfig.hpp"
 # include <sys/stat.h>
 
 /*class Response
@@ -29,6 +30,9 @@ class Response
 		std::map<std::string, std::string>	_fileTypes;
 		std::map<int, std::string>			_errors;
 		std::string							_default_error;
+		ServerConfig 						*_conf;
+
+		Response( void );
 
 	//SETTERS
 		void	setErrors( void );
@@ -36,7 +40,9 @@ class Response
 
 	public:
 
-		Response( void );
+		Response( ServerConfig * conf );
+		Response( const Response & source );
+		Response & operator=( const Response & source );
 		~Response( void );
 
 		void	sendPage( std::string page, epoll_event & client, std::string request, int error );

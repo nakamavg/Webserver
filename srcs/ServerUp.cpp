@@ -61,7 +61,7 @@ Inicializa la structura creando un mapa donde la clave es el fd y el valor es la
 recorriendo el array de clases de los servidores
 */
 void ServerUp::GenStruct(std::map<int, sockaddr_in> *servers,
-	std::vector<int> *sockets)
+	std::vector<int> *sockets,std::map<int,ServerConfig *> *serverPort)
 {
 	size_t			i;
 	sockaddr_in	serverAddress;
@@ -74,10 +74,12 @@ void ServerUp::GenStruct(std::map<int, sockaddr_in> *servers,
 		serverAddress.sin_addr.s_addr = inet_addr(list[i].getHost().c_str());
 		serverAddress.sin_port = htons(list[i].getPort());
 		servers->insert(std::make_pair((*sockets)[i], serverAddress));
+		serverPort->insert(std::make_pair((*sockets)[i], &list[i]));
+
 		i++;
 	}
 }
-void ServerUp::newConect(int serverfd, int fdEpoll)
+void ServerUp::newConect(int serverfd, int fdEpoll,std::map<int,ServerConfig *> *serverPort,std::map<int, ServerConfig>*clientPort)
 {
 	epoll_event ev;
 	sockaddr in_addr;
@@ -86,7 +88,6 @@ void ServerUp::newConect(int serverfd, int fdEpoll)
 	std:: cout<< "en newconnect antes de accept " << serverfd << std::endl;
 	if ((newfd = accept(serverfd, (struct sockaddr *)&in_addr, &in_addr_len)) < 0)
 	{
-		exit(6);
 		if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
 		{
 				std::cout << "we already processed all incoming connections" << std::endl;
@@ -98,6 +99,7 @@ void ServerUp::newConect(int serverfd, int fdEpoll)
 	}
 		setsocknonblock(newfd);
 	::bzero(&ev,sizeof(ev));
+		clientPort->insert(std::make_pair(newfd,*serverPort->find(serverfd)->second ));
 	ev.events = EPOLLIN;
 	ev.data.fd= newfd;
 	if(epoll_ctl(fdEpoll,EPOLL_CTL_ADD,newfd, &ev)< 0)
@@ -165,8 +167,11 @@ void ServerUp::start()
 
 
 	std::map<int, sockaddr_in> se;
+	std::map<int , ServerConfig *> serverPort;
+	
+	
 	vSockets = get_SocketsOfServer();
-	GenStruct(&se, &vSockets);
+	GenStruct(&se, &vSockets, &serverPort);
 	// este es el primer epoll para serverver;
 	// vamos a generar la estructura que necesitamos para los eventos de nuevos servers
 	epoll_fd = epoll_create(MAX_EVENTS);
@@ -196,6 +201,7 @@ void ServerUp::start()
 	// estructura para los eventos de conexiones de clientes
 	while (42)
 	{
+		std::map<int,ServerConfig> clientPort;
 		// devuelve el numero de fds que han sido actualizados
 		std::cout << "antes del epoll wait" << std::endl;
 		fdac = epoll_wait(epoll_fd, evClient, MAX_EVENTS, -1);
@@ -210,7 +216,7 @@ void ServerUp::start()
 				if(int fdconnect = checkfd(evClient[n].data.fd))
 				{	
 					std::cout << fdconnect << std::endl;
-					 newConect(fdconnect,epoll_fd);
+					 newConect(fdconnect,epoll_fd,&serverPort,&clientPort);
 					 std::cout << "despues del accept"<<std::endl;
 					 break;
 				}
@@ -222,19 +228,18 @@ void ServerUp::start()
 					
 					std::string	request;
 
+					//GESTION REQUEST VACIA
 					request = readHttpRequest(evClient[n].data.fd);
-					
-					/*int nRead = read(evClient[n].data.fd, buffer, 99999);
-					buffer[nRead] = '\0';
-					std::string b = buffer;
-					std::cout << b << std::endl;
-					std::cout << html << std::endl;*/
 
 					//----------------------------
 					//Pruebas de parseo de request y checkeo
 
 					if (checkRequest(request))
 					{
+						/*for (std::vector<ServerConfig>::iterator it = list.begin() ; it < list.end(); it++)
+						{
+							if ((*it).getPort() == list);
+						}*/
 						ParseRequest	req(request);
 
 						int error = 0;
@@ -258,9 +263,9 @@ void ServerUp::start()
 						//else
 							//if ()
 								//redir
-							Response	response;
 
-							std::cout << req.getMethod() << "123\n";
+						Response	response(&clientPort[evClient[n].data.fd]);
+
 						//Evento de escritura / mensaje
 						if (evClient[n].events & EPOLLIN)
 						{
