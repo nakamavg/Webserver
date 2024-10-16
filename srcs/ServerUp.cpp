@@ -61,7 +61,7 @@ Inicializa la structura creando un mapa donde la clave es el fd y el valor es la
 recorriendo el array de clases de los servidores
 */
 void ServerUp::GenStruct(std::map<int, sockaddr_in> *servers,
-	std::vector<int> *sockets,std::map<int,ServerConfig *> *serverPort)
+	std::vector<int> *sockets,std::map<int,ServerConfig> *serverPort)
 {
 	size_t			i;
 	sockaddr_in	serverAddress;
@@ -74,12 +74,12 @@ void ServerUp::GenStruct(std::map<int, sockaddr_in> *servers,
 		serverAddress.sin_addr.s_addr = inet_addr(list[i].getHost().c_str());
 		serverAddress.sin_port = htons(list[i].getPort());
 		servers->insert(std::make_pair((*sockets)[i], serverAddress));
-		serverPort->insert(std::make_pair((*sockets)[i], &list[i]));
+		serverPort->insert(std::make_pair((*sockets)[i], list[i]));
 
 		i++;
 	}
 }
-void ServerUp::newConect(int serverfd, int fdEpoll,std::map<int,ServerConfig *> *serverPort,std::map<int, ServerConfig>*clientPort)
+void ServerUp::newConect(int serverfd, int fdEpoll,std::map<int,ServerConfig> &serverPort,std::map<int, ServerConfig> &clientPort)
 {
 	epoll_event ev;
 	sockaddr in_addr;
@@ -99,7 +99,7 @@ void ServerUp::newConect(int serverfd, int fdEpoll,std::map<int,ServerConfig *> 
 	}
 		setsocknonblock(newfd);
 	::bzero(&ev,sizeof(ev));
-		clientPort->insert(std::make_pair(newfd,*serverPort->find(serverfd)->second ));
+		clientPort[newfd] = serverPort[serverfd];
 	ev.events = EPOLLIN;
 	ev.data.fd= newfd;
 	if(epoll_ctl(fdEpoll,EPOLL_CTL_ADD,newfd, &ev)< 0)
@@ -167,7 +167,8 @@ void ServerUp::start()
 
 
 	std::map<int, sockaddr_in> se;
-	std::map<int , ServerConfig *> serverPort;
+	std::map<int, ServerConfig> serverPort;
+	std::map<int, ServerConfig> clientPort;
 	
 	
 	vSockets = get_SocketsOfServer();
@@ -201,7 +202,6 @@ void ServerUp::start()
 	// estructura para los eventos de conexiones de clientes
 	while (42)
 	{
-		std::map<int,ServerConfig> clientPort;
 		// devuelve el numero de fds que han sido actualizados
 		std::cout << "antes del epoll wait" << std::endl;
 		fdac = epoll_wait(epoll_fd, evClient, MAX_EVENTS, -1);
@@ -216,7 +216,7 @@ void ServerUp::start()
 				if(int fdconnect = checkfd(evClient[n].data.fd))
 				{	
 					std::cout << fdconnect << std::endl;
-					 newConect(fdconnect,epoll_fd,&serverPort,&clientPort);
+					 newConect(fdconnect,epoll_fd, serverPort, clientPort);
 					 std::cout << "despues del accept"<<std::endl;
 					 break;
 				}
@@ -263,7 +263,6 @@ void ServerUp::start()
 						//else
 							//if ()
 								//redir
-
 						Response	response(&clientPort[evClient[n].data.fd]);
 
 						//Evento de escritura / mensaje
