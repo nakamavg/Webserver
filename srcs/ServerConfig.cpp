@@ -176,6 +176,7 @@ ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterato
     //std::cout << "Number of Locations in this server: " << locations.size() << std::endl;
     if (sc.port == 0 && sc.host.empty())
         throw MyException("Error: Missing info to be able to open the server");
+    sc.setLocations(getLocations());
     return sc;
 }
 

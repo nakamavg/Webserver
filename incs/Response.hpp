@@ -30,7 +30,7 @@ class Response
 		std::map<std::string, std::string>	_fileTypes;
 		std::map<int, std::string>			_errors;
 		std::string							_default_error;
-		ServerConfig 						*_conf;
+		ServerConfig 						_conf;
 
 		Response( void );
 
@@ -40,7 +40,7 @@ class Response
 
 	public:
 
-		Response( ServerConfig * conf );
+		Response( ServerConfig & conf );
 		Response( const Response & source );
 		Response & operator=( const Response & source );
 		~Response( void );

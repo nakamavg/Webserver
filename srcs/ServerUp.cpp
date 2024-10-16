@@ -121,6 +121,7 @@ ServerUp::ServerUp(const std::vector<ServerConfig> &raw) : nServers(0), list(raw
 	size_t	nserv;
 
 	std::cout << "pepe" << std::endl;
+
 	nserv = 0;
 	std::vector<ServerConfig>::iterator pailan = list.begin();
 	while (pailan != list.end())
@@ -169,8 +170,7 @@ void ServerUp::start()
 	std::map<int, sockaddr_in> se;
 	std::map<int, ServerConfig> serverPort;
 	std::map<int, ServerConfig> clientPort;
-	
-	
+
 	vSockets = get_SocketsOfServer();
 	GenStruct(&se, &vSockets, &serverPort);
 	// este es el primer epoll para serverver;
@@ -263,7 +263,7 @@ void ServerUp::start()
 						//else
 							//if ()
 								//redir
-						Response	response(&clientPort[evClient[n].data.fd]);
+						Response	response(clientPort[evClient[n].data.fd]);
 
 						//Evento de escritura / mensaje
 						if (evClient[n].events & EPOLLIN)

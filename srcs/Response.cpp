@@ -20,7 +20,7 @@ std::string Response::get_web()
 Response::Response(void)
 {}
 
-Response::Response(ServerConfig * conf)
+Response::Response(ServerConfig &conf)
 {
 	setErrors();
     _default_error = "HTTP/1.1 404 Not Found\n";
@@ -255,16 +255,16 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	}
 
 	//raiz del server
-	const std::map<std::string, Locations>& map = _conf->getLocations();
-	for(std::map<std::string, Locations>::const_iterator it = map.begin(); it != map.end(); it++)
-		std::cout << "EL STRING DEL MAPA ES: " << it->first << std::endl;
+	std::cout << "123\n";
+	std::map<std::string, Locations> map = _conf.getLocations();
 
 	struct Locations *loc = NULL;
-	loc = &_conf->getLocations().find("Default")->second;
+	loc = &_conf.getLocations()["Default"];
+
 	if (loc == NULL)
 	{
 		std::cout << "123\n";
-		loc = &_conf->getLocations()["Default"];
+		loc = &_conf.getLocations()["Default"];
 	}
 	std::string	path = loc->path;
 	std::cout << "123 - " << path << "\n";
