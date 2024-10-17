@@ -7,17 +7,7 @@
 # include "../incs/ParseRequest.hpp"
 # include "../incs/ServerConfig.hpp"
 # include <sys/stat.h>
-
-/*class Response
-{
-  public:
-	Response(std::string &html);
-	~Response();
-	std::string get_web();
-
-  private:
-	std::string web;
-};*/
+# include <dirent.h>
 
 
 class ParseRequest;
@@ -30,7 +20,7 @@ class Response
 		std::map<std::string, std::string>	_fileTypes;
 		std::map<int, std::string>			_errors;
 		std::string							_default_error;
-		ServerConfig 						*_conf;
+		ServerConfig 						_conf;
 
 		Response( void );
 
@@ -40,7 +30,7 @@ class Response
 
 	public:
 
-		Response( ServerConfig * conf );
+		Response( ServerConfig & conf );
 		Response( const Response & source );
 		Response & operator=( const Response & source );
 		~Response( void );
@@ -49,6 +39,7 @@ class Response
 		void	sendError( int error, epoll_event & client );
 		void	sendChuncked( std::string, epoll_event & client, int error );
 		bool	writePost( std::string path, epoll_event & client, std::string str );
+		void	listing(epoll_event &client, std::string url, std::string path);
 
 
 	//METHODS

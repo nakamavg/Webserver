@@ -20,7 +20,7 @@ std::string Response::get_web()
 Response::Response(void)
 {}
 
-Response::Response(ServerConfig * conf)
+Response::Response(ServerConfig &conf)
 {
 	setErrors();
     _default_error = "HTTP/1.1 404 Not Found\n";
@@ -254,26 +254,26 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 		return ;
 	}
 
-	//raiz del server
-	const std::map<std::string, Locations>& map = _conf->getLocations();
-	for(std::map<std::string, Locations>::const_iterator it = map.begin(); it != map.end(); it++)
-		std::cout << "EL STRING DEL MAPA ES: " << it->first << std::endl;
+	std::map<std::string, Locations> map = _conf.getLocations();
+	struct Locations *location = NULL;
 
-	struct Locations *loc = NULL;
-	loc = &_conf->getLocations().find("Default")->second;
-	if (loc == NULL)
-	{
+	location = &_conf.getLocations()["Default"];
+	//Revisar
+	if (!location)
+		location = &_conf.getLocations()["Default"];
+
+	//las location por sintaxis contienen un ';' al final / arreglar
+	location->path.erase(location->path.size()-1, location->path.size());
+	std::string	path = "." + location->path + url;
+	if (checkIndex(path, location->index.erase(location->index.size() - 1, location->index.size())))
 		std::cout << "123\n";
-		loc = &_conf->getLocations()["Default"];
-	}
-	std::string	path = loc->path;
-	std::cout << "123 - " << path << "\n";
-
-	/*if (location && !location->getIndex().empty() && checkIndex(path, location->getIndex()))
+	if (location && !location->index.empty() && checkIndex(path, location->index))
 	{
-		sendPage(path + '/' + location->getIndex(), client, request.getRequest(), 200);
+		sendPage(path + location->index, client, request.getRequest(), 200);
 		return ;
-	}*/
+	}
+
+	std::cout  << path;
 
 	struct stat	stat_path;
 	int	fd = open(path.c_str(), O_RDONLY);
@@ -286,9 +286,8 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	}
 	if (S_ISDIR(stat_path.st_mode))
 	{	
-		//index
-		if (checkIndex(path, "index.html")/* && !location*/)
-			sendPage(path + '/' + "index.html", client, request.getRequest(), 200);
+		if (checkIndex(path, location->index) && !location)
+			sendPage(path + location->index, client, request.getRequest(), 200);
 		/*else if (_server[client.getServ()].getListing() && location && location->getListing())
 			listing(client, url, path);*/
 		else
@@ -303,8 +302,16 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 {
 	std::cout << "Post Method\n";
 
-	//raiz del servidor
-	std::string	path = "html/" + request.getRoute();
+	std::map<std::string, Locations> map = _conf.getLocations();
+	struct Locations *location = NULL;
+
+	location = &_conf.getLocations()["Default"];
+
+	//Revisar
+	if (!location)
+		location = &_conf.getLocations()["Default"];
+
+	std::string	path = location->path + request.getRoute();
 	struct stat	stat_path;
 	lstat(path.c_str(), &stat_path);
 
@@ -372,8 +379,15 @@ void	Response::metodDelete(epoll_event & client, ParseRequest & request)
 {
 	std::cout << "Delete Method\n";
 
-	//raiz del servidor
-	std::string	path = "html/" + request.getRoute();
+	std::map<std::string, Locations> map = _conf.getLocations();
+	struct Locations *location = NULL;
+
+	location = &_conf.getLocations()["Default"];
+
+	//Revisar
+	if (!location)
+		location = &_conf.getLocations()["Default"];
+	std::string	path = location->path + request.getRoute();
 	std::ifstream	fd(path.c_str());
 	if (!fd)
 	{
@@ -453,7 +467,7 @@ std::string Response::getError(int n)
 //UTILS
 bool		checkIndex(std::string path, std::string index)
 {
-	std::string indexFile = path + '/' + index;
+	std::string indexFile = path + index;
 	struct stat stat_index;
 	if (stat(indexFile.c_str(), &stat_index) == 0 && S_ISREG(stat_index.st_mode))
 		return true;
