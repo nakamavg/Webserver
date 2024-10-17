@@ -15,6 +15,8 @@ ServerConfig::ServerConfig(const ServerConfig &copy)
     this->client_max_body_size = copy.client_max_body_size;
     this->error_pages = copy.error_pages;
     this->locations = copy.locations;
+    this->def_index = copy.def_index;
+    this->def_root = copy.def_root;
 }
 
 ServerConfig::~ServerConfig()
@@ -30,6 +32,8 @@ ServerConfig &ServerConfig::operator=(const ServerConfig &src)
         this->client_max_body_size = src.client_max_body_size;
         this->error_pages = src.error_pages;
         this->locations = src.locations;
+        this->def_index = src.def_index;
+        this->def_root = src.def_root;
     }
     return *this;
 }
@@ -77,12 +81,16 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
             {
                 if (location.path != "")
                     throw MyException("Error: duplicated root on location");
-                location.path = line->substr(std::string("root ").length());
+
+                std::string valueLine = line->substr(std::string("root ").length());
+                valueLine.erase(valueLine.size() - 1);
+                location.path = valueLine;
             }
             else if (line->find("allow_methods") == 0)
             {
                 if (!location.allowed_methods.empty())
                     throw MyException("Error: duplicated allow_methods on location");
+
                 std::string methods = line->substr(std::string("allow_methods ").length());
                 location.allowed_methods = parseMethods(methods);
             }
@@ -90,6 +98,7 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
             {
                 if (location.autoindex)
                     throw MyException("Error: duplicated directory_listing on location");
+
                 std::string value = line->substr(std::string("directory_listing ").length());
                 location.autoindex = (value == "on");
             }
@@ -97,24 +106,34 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
             {
                 if (!location.index.empty())
                     throw MyException("Error: duplicated index on location");
-                location.index = line->substr(std::string("index ").length());
+
+                std::string valueLine = line->substr(std::string("index ").length());
+                valueLine.erase(valueLine.size() - 1);
+                location.index = valueLine;
             }
             else if (line->find("default_file") == 0)
             {
                 if (!location.default_file.empty())
                     throw MyException("Error: duplicated default_file on location");
-                location.default_file = line->substr(std::string("default_file ").length());
+
+                std::string valueLine = line->substr(std::string("default_file ").length());
+                valueLine.erase(valueLine.size() - 1);
+                location.default_file = valueLine;
             }
             else if (line->find("upload_dir") == 0)
             {
                 if (!location.upload_dir.empty())
                     throw MyException("Error: duplicated upload_dir on location");
-                location.upload_dir = line->substr(std::string("upload_dir ").length());
+
+                std::string valueLine = line->substr(std::string("upload_dir ").length());
+                valueLine.erase(valueLine.size() - 1);
+                location.upload_dir = valueLine;
             }
             else if (line->find("upload_enable") == 0)
             {
                 if (location.upload_enable)
                     throw MyException("Error: duplicated upload_enable on location");
+
                 std::string value = line->substr(std::string("upload_enable ").length());
                 location.upload_enable = (value == "on");
             }
@@ -122,19 +141,28 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
             {
                 if (!location.path_info.empty())
                     throw MyException("Error: duplicated path_info on location");
-                location.path_info = line->substr(std::string("path_info ").length());
+
+                std::string valueLine = line->substr(std::string("path_info ").length());
+                valueLine.erase(valueLine.size() - 1);
+                location.path_info = valueLine;
             }
             else if (line->find("cgi_extension") == 0)
             {
                 if (!location.cgi_extension.empty())
                     throw MyException("Error: duplicated cgi_extension on location");
-                location.cgi_extension = line->substr(std::string("cgi_extension ").length());
+
+                std::string valueLine = line->substr(std::string("cgi_extension ").length());
+                valueLine.erase(valueLine.size() - 1);
+                location.cgi_extension = valueLine;
             }
             else if (line->find("return") == 0)
             {
                 if (!location.redirect.empty())
                     throw MyException ("Error: duplicated return on location");
-                location.redirect = line->substr(std::string("return ").length());
+                
+                std::string valueLine = line->substr(std::string("return ").length());
+                valueLine.erase(valueLine.size() - 1);
+                location.redirect = valueLine;
             }
             else
             {
@@ -197,6 +225,7 @@ void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &li
             throw MyException ("Error: duplicated server_name on server");
 
         valueLine = line->substr(std::string("server_name ").length());
+        valueLine.erase(valueLine.size() - 1);
         sc.server_names.push_back(valueLine);
     }
     else if (line->find("client_max_body_size") == 0)
@@ -209,7 +238,19 @@ void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &li
     }
     else if (line->find("error_page") == 0)
     {
-        valueLine = line->substr(std::string("error_page").length());
+        valueLine = line->substr(std::string("error_page ").length());
+    }
+    else if (line->find("root") == 0)
+    {
+        valueLine = line->substr(std::string("root ").length());
+        valueLine.erase(valueLine.size() - 1);
+        sc.def_root = valueLine;
+    }
+    else if (line->find("index") == 0)
+    {
+        valueLine = line->substr(std::string("index ").length());
+        valueLine.erase(valueLine.size() - 1);
+        sc.def_index = valueLine;
     }
 }
 
@@ -303,6 +344,12 @@ void ServerConfig::printServerConfig(ServerConfig sc)
         std::cout << std::endl;
     }
 
+    if (!sc.def_index.empty())
+        std::cout << "DEF INDEX: " << sc.def_index << std::endl;
+
+    if (!sc.def_root.empty())
+        std::cout << "DEF ROOT: " << sc.def_root << std::endl;
+    
     std::cout << std::endl;
     for (std::map<std::string, Locations>::iterator it = locations.begin(); it != locations.end(); ++it)
     {

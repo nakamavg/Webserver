@@ -84,6 +84,9 @@ class ServerConfig
         std::map<int, std::string> error_pages;         // Páginas de error por defecto (código -> archivo)
         std::map<std::string, Locations> locations;     // Locations 
         
+        std::string def_root;
+        std::string def_index;
+
         //Locations locations;
 };
 
