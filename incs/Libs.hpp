@@ -14,6 +14,7 @@
 #include "ServerUp.hpp"
 #include <vector>
 #include <map>
+#include <iterator> 
 #include <fstream>
 #include <unistd.h>
 #include <sys/wait.h>

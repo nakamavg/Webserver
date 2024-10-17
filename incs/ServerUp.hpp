@@ -20,6 +20,7 @@ public:
 	void start();
 	void stop();
 	size_t getNservers();
+	std::vector<ServerConfig>& GetList();
 private:
 	std::string ip;
 	size_t port;
@@ -33,8 +34,6 @@ private:
 	void newConect(int serverfd, int fdEpoll, std::map<int, ServerConfig> &serverPort, std::map<int, ServerConfig> &clientPort);
 	int checkfd(int fd);
 
-
 	std::string	readHttpRequest( int socket );
-
 
 };

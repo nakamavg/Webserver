@@ -103,12 +103,19 @@ void    WebServer::parseFile()
             throw MyException("Error: Syntax error (server)");
     }
     if (brackets !=0)
-        throw MyException("Error: Check the brackets!");
+        throw MyException("Error: Forbiden use of brackets");
     
-    int i = 1;
-    for (std::vector<ServerConfig>::iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
-    {
-        std::cout << "\033[32m" << "------ Server " << i++ << "  ------" << "\033[0m" << std::endl;
-       (*it).printServerConfig((*it));
-    }
+    // int i = 1;
+    // for (std::vector<ServerConfig>::iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
+    // {
+    //     std::cout << "\033[32m" << "------ Server " << i++ << "  ------" << "\033[0m" << std::endl;
+    //    (*it).printServerConfig((*it));
+    // }
+
+    // int i = 1;
+    // for (std::vector<ServerConfig>::iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
+    // {
+    //    (*it).getPort();
+    // }
+    checkPorts(serverConfigs);
 }

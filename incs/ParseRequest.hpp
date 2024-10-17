@@ -31,13 +31,9 @@ class ParseRequest
 
         std::string     _request;
 
-        ServerConfig*   _conf;//
-
         ParseRequest( void );
 
     public:
-
-        //ParseRequest(std::string _raw_request, std::vector<ServerConfig> &list);
 
         ParseRequest( std::string _raw_request );
         ParseRequest( const ParseRequest& source );
@@ -61,11 +57,6 @@ class ParseRequest
 		std::string		getBody( void );
         std::string     getFullBody( void );
 		std::map<std::string, std::string>		getHeader( void );
-
-        /*void ParseLine();
-        void ParseHead();
-        void ParseBody();
-        void HasChunked();*/
 
 };
 

@@ -74,7 +74,7 @@ class ServerConfig
         // Getter y Setter para locations
         std::map<std::string, Locations> getLocations() const { return locations; }
         void setLocations(const std::map<std::string, Locations> &newLocations) { locations = newLocations; }
-    
+
     private:
         // Configuración general del servidor
         std::string host;                               // Nombre del servidor para el manejo de virtual hosts
@@ -83,7 +83,7 @@ class ServerConfig
         size_t client_max_body_size;                    // Tamaño máximo del cuerpo de la solicitud
         std::map<int, std::string> error_pages;         // Páginas de error por defecto (código -> archivo)
         std::map<std::string, Locations> locations;     // Locations 
-        
+
         //Locations locations;
 };
 

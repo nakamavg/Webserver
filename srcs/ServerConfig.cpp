@@ -183,6 +183,12 @@ ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterato
 void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &line, ServerConfig &sc)
 {
     std::string valueLine;
+
+    if ((*line).find("{") != std::string::npos)
+    {
+        throw MyException("Error: Forbiden use of brackets");
+    }
+
     if (line->find("listen") == 0)
     {
         if ((sc.port != 0) || sc.host !="")
@@ -210,6 +216,10 @@ void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &li
     else if (line->find("error_page") == 0)
     {
         valueLine = line->substr(std::string("error_page").length());
+    }
+    else
+    {
+        throw MyException ("Error: Syntax error");
     }
 }
 
