@@ -1,17 +1,23 @@
-#include "incs/WebServer.hpp"
-#include "incs/ServerUp.hpp"
+#include "../incs/WebServer.hpp"
+#include "../incs/ServerUp.hpp"
 
 int main(int argc, char **argv)
 {
-    if (argc == 2)
-    {
-        // std::string fileName = "default.conf";
-        try
+    std::string fileName;
+
+    if (argc == 1)
+        fileName = "default.conf";
+    else if (argc == 2)
+        fileName = argv[1];
+    else
+        return (std::cout << "Usage: ./testeo [filename].conf" << std::endl, 2);
+
+    try
         {
             WebServer ws;
             
-            ws.validFileName(argv[1]);
-            ws.readConfFile(argv[1]);
+            ws.validFileName(fileName);
+            ws.readConfFile(fileName);
             ws.parseFile();
             ServerUp a(ws.getServerConfigs());
             a.start();
@@ -23,7 +29,4 @@ int main(int argc, char **argv)
         {
             std::cerr << e.what() << '\n';
         }
-    }
-    else
-        std::cout << "Usage: ./testeo [filename].conf" << std::endl;
 }
