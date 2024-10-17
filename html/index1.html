@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patata get</title>
+    <title>Buscador Sencillo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,11 +12,11 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #424549;
+            background-color: #f0f0f0;
         }
         .search-container {
             text-align: center;
-            background: #1e2124;
+            background: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -28,23 +28,24 @@
             border-radius: 4px;
             margin-right: 10px;
         }
-        .search-container button {
+        .search-container a {
             padding: 10px 20px;
             border: none;
             border-radius: 4px;
-            background-color: #7289da;
+            background-color: #4CAF50;
             color: white;
+            text-decoration: none;
             cursor: pointer;
         }
-        .search-container button:hover {
-            background-color: #5366aa;
+        .search-container a:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <form class="search-container" action="/patata_get" method="GET">
-        <input type="text" name="mensaje" placeholder="Patata">
-        <button type="submit">Send</button>
-    </form>
+    <div class="search-container">
+        <input type="text" placeholder="Escribe tu búsqueda...">
+        <a href="holamundo.html">Aceptar</a>
+    </div>
 </body>
 </html>

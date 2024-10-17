@@ -85,7 +85,8 @@ void    WebServer::parseFile()
                 serverFlag = true;
                 brackets++;
 
-                ServerConfig sc = sc.manageServerBracket(++line, raw_file);
+                ServerConfig sc ;
+                sc = sc.manageServerBracket(++line, raw_file);
                 //devuelve una configuracion de servidor y la guardamos
                 serverConfigs.push_back(sc);
             }
@@ -102,19 +103,12 @@ void    WebServer::parseFile()
             throw MyException("Error: Syntax error (server)");
     }
     if (brackets !=0)
-        throw MyException("Error: Forbiden use of brackets");
+        throw MyException("Error: Check the brackets!");
     
-    // int i = 1;
-    // for (std::vector<ServerConfig>::iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
-    // {
-    //     std::cout << "\033[32m" << "------ Server " << i++ << "  ------" << "\033[0m" << std::endl;
-    //    (*it).printServerConfig((*it));
-    // }
-
-    // int i = 1;
-    // for (std::vector<ServerConfig>::iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
-    // {
-    //    (*it).getPort();
-    // }
-    checkPorts(serverConfigs);
+    int i = 1;
+    for (std::vector<ServerConfig>::iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
+    {
+        std::cout << "\033[32m" << "------ Server " << i++ << "  ------" << "\033[0m" << std::endl;
+       (*it).printServerConfig((*it));
+    }
 }

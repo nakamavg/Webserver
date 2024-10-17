@@ -128,25 +128,3 @@ void parseCmbs(std::string str, ServerConfig &sc)
     }
     sc.setClientMaxBodySize(cmbs);
 }
-
-void checkPorts(const std::vector<ServerConfig> &serverConfigs)
-{
-    std::vector<int> uniquePorts;  // Vector para almacenar puertos únicos
-
-    for (std::vector<ServerConfig>::const_iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
-    {
-        int port = (*it).getPort();  // Obtener el puerto actual
-
-        // Verificar si el puerto ya está en el vector uniquePorts
-        for (std::vector<int>::const_iterator portIt = uniquePorts.begin(); portIt != uniquePorts.end(); ++portIt)
-        {
-            if (*portIt == port)
-            {
-                throw MyException("Error: Duplicated Ports founds");
-            }
-        }
-
-        // Si no se encontró duplicado, añadimos el puerto al vector uniquePorts
-        uniquePorts.push_back(port);
-    }
-}

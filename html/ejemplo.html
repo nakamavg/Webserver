@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscador Sencillo</title>
+    <title>Hola Mundo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,37 +14,35 @@
             margin: 0;
             background-color: #f0f0f0;
         }
-        .search-container {
+        .container {
             text-align: center;
             background: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .search-container input[type="text"] {
-            padding: 10px;
-            width: 300px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 10px;
-        }
-        .search-container button {
+        button {
             padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            background-color: #4CAF50;
+            background-color: #dc3545;
             color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
+            margin-top: 20px;
         }
-        .search-container button:hover {
-            background-color: #45a049;
+        button:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 <body>
-    <div class="search-container">
-        <input type="text" placeholder="Escribe tu búsqueda...">
-        <button type="button">Aceptar</button>
+    <div class="container">
+        <h1>Hola Mundo Patata</h1>
+        <form action="ejemplo.html" method="POST">
+            <input type="hidden" name="param1" value="valor1patata">
+            <input type="hidden" name="param2" value="valor2">
+            <button type="submit">Enviar POST a ejemplo.html</button>
+        </form>
     </div>
 </body>
 </html>

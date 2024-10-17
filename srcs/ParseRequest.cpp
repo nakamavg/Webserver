@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   ParseRequest.cpp                                   :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: anurtiag <anurtiag@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/20 10:12:44 by anurtiag          #+#    #+#             */
-/*   Updated: 2024/10/09 13:50:45 by anurtiag         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../incs/ParseRequest.hpp"
 
 std::string ft_read(std::string filename)
@@ -20,6 +8,7 @@ std::string ft_read(std::string filename)
 
 	if(!infile.is_open())
 	{
+		//SEND ERROR
 		throw MyException("Error 404: Not found");
 	}
 	while (std::getline(infile, line))
@@ -29,8 +18,8 @@ std::string ft_read(std::string filename)
 	infile.close();
 	return (text);
 }
-
-// ParseRequest::ParseRequest(std::string _raw_request)
+/*
+// ParseParseRequest::ParseRequest(std::string _raw_request)
 // {
 // 	size_t _method_end = _raw_request.find(" ");
 // 	size_t _route_lenght = _raw_request.find(" H") - _method_end - 1;
@@ -41,31 +30,43 @@ std::string ft_read(std::string filename)
 // 	std::cout << "---->" << _method << "<----" << "    " << "--->" << _route << "<---" << "--->" << _version << "<----"  << std::endl;
 // }
 
-ParseRequest::ParseRequest(std::string _raw_request, std::vector<ServerConfig> &list) : _conf(NULL)
+ParseParseRequest::ParseRequest(std::string _raw_request, std::vector<ServerConfig> &list) : _conf(NULL)
 {
 	size_t _method_end = _raw_request.find(" ");
 	size_t _route_end = _raw_request.find(" H");
 	size_t	_line_end = _raw_request.find(ENDLINE);
-	size_t	_headerEnd = _raw_request.find("\r\n\r\n");
+	size_t	_rHeaderEnd = _raw_request.find("\r\n\r\n");
+
 	std::string	_hostip;
 	std::string _hostport;
+
 	// std::cout << _raw_request << std::endl;
 	_rLine = _raw_request.substr(0, _line_end);
-	_rHeader = _raw_request.substr(_line_end, (_headerEnd - _line_end));
-	_rBody = _raw_request.substr(_headerEnd);
+	_rHeader = _raw_request.substr(_line_end, (_rHeaderEnd - _line_end));
+	_rBody = _raw_request.substr(_rHeaderEnd);
+
 	size_t _host = _rHeader.find("Host: ");
 	_host += 6;
+
 	size_t _hostend = _host;
+
 	for(; _rHeader[_hostend] != ':'; _hostend++)
 		;
+
 	_hostip = _rHeader.substr(_host, _hostend - _host);
 	_host = _hostend + 1;
+
 	for(; _rHeader[_hostend] != '\r'; _hostend++)
 		;
+
 	_hostport = _rHeader.substr(_host, (_hostend - _host));
+
 	std::cout << "IP REQUEST " << _hostip << "PUERTO REQUEST " << _hostport << std::endl;
+	
 	for(std::vector<ServerConfig>::iterator it = list.begin(); it != list.end(); it++)
 	{
+		std::cout << it->getHost() << " --- " << _hostip << "\n";
+
 		if((*it).getHost() == _hostip && (*it).getPort() == std::atoi(_hostport.c_str()))
 		{
 				std::cout << "FUNTXIONAAAA\n";
@@ -89,16 +90,16 @@ ParseRequest::ParseRequest(std::string _raw_request, std::vector<ServerConfig> &
 	this->ParseLine();
 }
 
-ParseRequest::~ParseRequest() {}
+ParseParseRequest::~ParseRequest() {}
 
-// ParseRequest::ParseRequest(const ParseRequest& source) {(void)source;}
+// ParseParseRequest::ParseRequest(const ParseRequest& source) {(void)source;}
 
-// ParseRequest& ParseRequest::operator=(const ParseRequest& source)
+// ParseRequest& ParseParseRequest::operator=(const ParseRequest& source)
 // {
 //     return(*this);
 // }
 
-void ParseRequest::ParseLine()
+void ParseParseRequest::ParseLine()
 {
 	std::string other;
 	size_t _method_end = _rLine.find(" ");
@@ -117,12 +118,12 @@ void ParseRequest::ParseLine()
 
 }
 
-void ParseRequest::ParseHead()
+void ParseParseRequest::ParseHead()
 {
 
-}
+}*/
 
-// void ParseRequest::HasChunked()
+// void ParseParseRequest::HasChunked()
 // {
 // 	size_t newline = _rBody.find(END_LINE);
 // 	std::string line = _rBody.substr(0, newline);
@@ -130,3 +131,261 @@ void ParseRequest::ParseHead()
 // 	size_t charnbr = _rBody.
 	
 // }
+
+bool	checkRequest(std::string request)
+{
+	int		sizeBody = request.size() - (request.find("\r\n\r\n") + 4);
+	
+	if (!request.find("\r\n\r\n"))
+		return false;
+	if (request.find("Transfer-Encoding: chunked") != std::string::npos)
+	{
+		if (!request.find("0\r\n\r\n"))
+			return false;
+		return true;
+	}
+	else if(request.find("Content-Length") != std::string::npos)
+	{
+		std::string content = request;
+		content.erase(0, content.find("Content-Length") + 16);
+		if (!content.find("\r\n"))
+			return false;
+		content.erase(content.find("\r\n"), content.size());
+
+		if (std::atoi(content.c_str()) > sizeBody)
+			return false;
+		if (request.find("boundary=") != std::string::npos)
+		{
+			if (request.find("--"))
+				return true;
+			return false;
+		}
+	}
+	return true;
+}
+
+bool	checkMethod(std::string method, std::vector<std::string> allowed_methods)
+{
+	for (size_t i = 0; i < allowed_methods.size(); i++)
+		if (allowed_methods[i] == method)
+			return true;
+	return false;
+}
+
+ParseRequest::ParseRequest(void)
+{}
+
+ParseRequest::~ParseRequest(void)
+{}
+
+ParseRequest::ParseRequest(std::string _raw_request)
+{
+	std::stringstream	strs(_raw_request.c_str());
+
+	strs >> _method;
+	strs >> _route;
+	strs >> _version;
+
+	_request = _raw_request;
+	_length = 0;
+
+	makeCgiBody();
+
+	if (_method == "GET")
+		makeGet(strs);
+	else if (_method == "POST")
+		makePost(strs);
+}
+
+ParseRequest::ParseRequest(const ParseRequest & source)
+{
+	*this = source;
+}
+
+ParseRequest	&ParseRequest::operator=(const ParseRequest &source)
+{
+	_method = source._method;
+	_route = source._route;
+	_version = source._version;
+	_cgi_body = source._cgi_body;
+	_boundary = source._boundary;
+	_length = source._length;
+
+	_request = source._request;
+	_rHeader = source._rHeader;
+	_rBody = source._rBody;
+	_full_body = source._full_body;
+
+	return *this;
+}
+
+void	ParseRequest::makeCgiBody(void)
+{
+	size_t pos = _route.find("?");
+	if (pos != std::string::npos)
+		_cgi_body = _route.substr(pos + 1);
+}
+
+void	ParseRequest::makeGet(std::stringstream & strs)
+{
+	std::string	token;
+	std::string	line;
+	std::string	key;
+
+	while (strs >> token)
+	{
+		if (token[token.size() - 1] == ':')
+		{
+			if (!key.empty() && !line.empty() && key != token)
+			{
+				if (line[line.size() - 1] == ' ')
+					line.resize(line.size() - 2);
+				_rHeader[key] = token;
+			}
+			token.resize(token.size() - 2);
+			key = token;
+			line.clear();
+		}
+		else
+		{
+			if (!line.empty())
+				line += " ";
+			line += token;
+		}
+	}
+	if (!line.empty() && !key.empty())
+	{
+		if (line[line.size() - 1] == ' ')
+			line.resize(line.size() - 2);
+		_rHeader[key] = token;
+	}
+
+}
+
+void	ParseRequest::makePost(std::stringstream &strs)
+{
+	std::string token;
+	std::string	line;
+	std::string	key;
+	std::string buff;
+	size_t pos = _request.find("\r\n\r\n");
+
+	while (strs >> token)
+	{
+		if (token.find("boundary=") != std::string::npos)
+			_boundary = token.substr(token.find("boundary=") + 9);
+		else if (token == "Content-Length:")
+		{
+			if (!key.empty() && !line.empty() && key != token)
+			{
+				if (line[line.size() - 1] == ' ')
+					line.resize(line.size() - 2);
+				_rHeader[key] = line;
+				line.clear();
+			}
+			key = token;
+			strs >> token;
+			_rHeader[key] = token;
+			_length = ft_stoi(token);
+			key.clear();
+		}
+		else if (_request.find(token) >= pos - token.length()) 
+		{
+			pos += 4;
+			if (!key.empty() && key != token)
+			{
+				if (!line.empty())
+					line.resize(line.size() - 2);
+				if (!line.empty())
+					_rHeader[key] = token;
+				else
+					_rHeader[key] = token;
+			}
+			size_t pos_rHeader = pos;
+			while (pos < _length + pos_rHeader && pos < _request.size())
+			{
+				_full_body += _request[pos];
+				pos++;
+			}
+			if (_boundary.empty())
+				_rBody = _full_body;
+			break;
+		}
+		else if (token[token.size() - 1] == ':')
+		{
+			if (!key.empty() && key != token)
+			{
+				if (line[line.size() - 1] == ' ')
+					line.resize(line.size() - 2);
+				_rHeader[key] = line;
+			}
+			token.resize(token.size() - 2);
+			key = token;
+			line.clear();
+		}
+		else
+		{
+			if (!line.empty())
+				line += " ";
+			line += token;
+		}
+	}
+}
+
+int		ParseRequest::checkProt(void)
+{
+	if (_method.size() == 0 || _route.size() == 0 || _version.size() == 0)
+		return 400;
+	if (_method != "GET" && _method != "POST" && _method != "DELETE")
+		return 405;
+	if (_version != "HTTP/1.1")
+		return 505;
+	return 0;
+}
+
+
+//GETTERS
+std::string	ParseRequest::getRequest(void)
+{
+	return _request;
+}
+
+std::string	ParseRequest::getMethod(void)
+{
+	return _method;
+}
+
+std::string	ParseRequest::getRoute(void)
+{
+	return _route;
+}
+
+std::string	ParseRequest::getProtocol(void)
+{
+	return _version;
+}
+
+size_t	ParseRequest::getLength(void)
+{
+	return _length;
+}
+
+std::string	ParseRequest::getBoundary(void)
+{
+	return _boundary;
+}
+
+std::string	ParseRequest::getBody(void)
+{
+	return _rBody;
+}
+
+std::string	ParseRequest::getFullBody(void)
+{
+	return _full_body;
+}
+
+std::map<std::string, std::string>	ParseRequest::getHeader(void)
+{
+	return _rHeader;
+}

@@ -31,10 +31,10 @@ bool ServerUp::setupServerSocket(int serverSocket,
 	int	option;
 
 	option = 1;
-	//std::cout << "en setupserverSocket" << std::endl;
-	//std::cout << serverSocket << std::endl;
-	//std::cout << serverAddress.sin_family << std::endl;
-	//std::cout << serverAddress.sin_port << std::endl;
+	std::cout << "en setupserverSocket" << std::endl;
+	std::cout << serverSocket << std::endl;
+	std::cout << serverAddress.sin_family << std::endl;
+	std::cout << serverAddress.sin_port << std::endl;
 	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
 			&option, sizeof(option)) < 0)
 	{
@@ -61,9 +61,9 @@ Inicializa la structura creando un mapa donde la clave es el fd y el valor es la
 recorriendo el array de clases de los servidores
 */
 void ServerUp::GenStruct(std::map<int, sockaddr_in> *servers,
-	std::vector<int> *sockets)
+	std::vector<int> *sockets,std::map<int,ServerConfig *> *serverPort)
 {
-	int			i;
+	size_t			i;
 	sockaddr_in	serverAddress;
 
 	i = 0;
@@ -74,10 +74,12 @@ void ServerUp::GenStruct(std::map<int, sockaddr_in> *servers,
 		serverAddress.sin_addr.s_addr = inet_addr(list[i].getHost().c_str());
 		serverAddress.sin_port = htons(list[i].getPort());
 		servers->insert(std::make_pair((*sockets)[i], serverAddress));
+		serverPort->insert(std::make_pair((*sockets)[i], &list[i]));
+
 		i++;
 	}
 }
-void ServerUp::newConect(int serverfd, int fdEpoll)
+void ServerUp::newConect(int serverfd, int fdEpoll,std::map<int,ServerConfig *> *serverPort,std::map<int, ServerConfig>*clientPort)
 {
 	epoll_event ev;
 	sockaddr in_addr;
@@ -86,10 +88,9 @@ void ServerUp::newConect(int serverfd, int fdEpoll)
 	std:: cout<< "en newconnect antes de accept " << serverfd << std::endl;
 	if ((newfd = accept(serverfd, (struct sockaddr *)&in_addr, &in_addr_len)) < 0)
 	{
-		exit(6);
 		if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
 		{
-				//std::cout << "we already processed all incoming connections" << std::endl;
+				std::cout << "we already processed all incoming connections" << std::endl;
 		}
 		else
 		{
@@ -98,6 +99,7 @@ void ServerUp::newConect(int serverfd, int fdEpoll)
 	}
 		setsocknonblock(newfd);
 	::bzero(&ev,sizeof(ev));
+		clientPort->insert(std::make_pair(newfd,*serverPort->find(serverfd)->second ));
 	ev.events = EPOLLIN;
 	ev.data.fd= newfd;
 	if(epoll_ctl(fdEpoll,EPOLL_CTL_ADD,newfd, &ev)< 0)
@@ -114,36 +116,30 @@ size_t ServerUp::getNservers()
 	return (this->nServers);
 }
 
-std::vector<ServerConfig>& ServerUp::GetList()
-{
-	return(this->list);
-}
-
 ServerUp::ServerUp(const std::vector<ServerConfig> &raw) : nServers(0), list(raw)
 {
 	size_t	nserv;
 
-	//std::cout << "pepe" << std::endl;
+	std::cout << "pepe" << std::endl;
 	nserv = 0;
 	std::vector<ServerConfig>::iterator pailan = list.begin();
 	while (pailan != list.end())
 	{
 		std::cout << (*pailan).getHost() << std::endl;
 		std::cout << (*pailan++).getPort() << std::endl;
-		std::cout << std::endl;
 		nserv++;
 	}
 	this->nServers = nserv;
-	//std::cout << nServers << std::endl;
+	std::cout << nServers << std::endl;
 }
 std::vector<int> ServerUp::get_SocketsOfServer()
 {
-	int	i;
+	size_t	i;
 	int	serverSocket;
 
 	std::vector<int> sockets;
 	i = 1;
-	//std::cout << this->nServers << std::endl;
+	std::cout << this->nServers << std::endl;
 	while (i <= this->nServers)
 	{
 		if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -151,33 +147,31 @@ std::vector<int> ServerUp::get_SocketsOfServer()
 			std::cerr << errno << std::endl;
 			continue ;
 		} 
-		//std::cout << serverSocket << std::endl;
+		std::cout << serverSocket << std::endl;
 		sockets.push_back(serverSocket);
 		i++;
 	}
-	//std::cout << "no salgo de esta funcion" << std::endl;
+	std::cout << "no salgo de esta funcion" << std::endl;
 	return (sockets);
 }
 
 void ServerUp::start()
 {
-	int			serverSocket;
-	int			option;
 	int			epoll_fd;
 	epoll_event	evClient[MAX_EVENTS];
 	int			fdac;
-	int			i;
-	int			client_fd;
-	char		buffer[99999];
-	size_t		bytesRead;
+	//char		buffer[99999];
+	std::string response;
 	epoll_event	ev;
-	epoll_event	clients;
-	std::string html =ft_read("html/post.html");
+	std::string html =ft_read("html/index.html");
 
 
 	std::map<int, sockaddr_in> se;
+	std::map<int , ServerConfig *> serverPort;
+	
+	
 	vSockets = get_SocketsOfServer();
-	GenStruct(&se, &vSockets);
+	GenStruct(&se, &vSockets, &serverPort);
 	// este es el primer epoll para serverver;
 	// vamos a generar la estructura que necesitamos para los eventos de nuevos servers
 	epoll_fd = epoll_create(MAX_EVENTS);
@@ -187,7 +181,7 @@ void ServerUp::start()
 		perror("");
 		return ;
 	}
-	//std::cout << "antes del for" << std::endl;
+	std::cout << "antes del for" << std::endl;
 	for (std::vector<int>::iterator it = vSockets.begin(); it != vSockets.end(); ++it)
 	{
 		if (!setupServerSocket(*it, se[*it]))
@@ -202,50 +196,122 @@ void ServerUp::start()
 			close(*it);
 			continue ;
 		}
-		//std::cout << "patata" << std::endl;
+		std::cout << "patata" << std::endl;
 	}
 	// estructura para los eventos de conexiones de clientes
 	while (42)
 	{
+		std::map<int,ServerConfig> clientPort;
 		// devuelve el numero de fds que han sido actualizados
-		//std::cout << "antes del epoll wait" << std::endl;
+		std::cout << "antes del epoll wait" << std::endl;
 		fdac = epoll_wait(epoll_fd, evClient, MAX_EVENTS, -1);
 		if (fdac == -1)
 		{
 			perror("epoll_wait failed");
 			return ;
 		}
-		//std::cout << "despues del wait" << std::endl;
+		std::cout << "despues del wait" << std::endl;
 			for(int n = 0;n < fdac; n++)
 			{
 				if(int fdconnect = checkfd(evClient[n].data.fd))
 				{	
-					//std::cout << fdconnect << std::endl;
-					 newConect(fdconnect,epoll_fd);
-					 //std::cout << "despues del accept"<<std::endl;
+					std::cout << fdconnect << std::endl;
+					 newConect(fdconnect,epoll_fd,&serverPort,&clientPort);
+					 std::cout << "despues del accept"<<std::endl;
 					 break;
 				}
 				if(evClient[n].events & EPOLLIN)
 				{
-                int nRead = read(evClient[n].data.fd, buffer, 999999);
-                buffer[nRead] = '\0';
-                std::string b = buffer;
-				ParseRequest request(b, this->GetList());
-				//std::cout << b << std::endl;
-				//std::cout << html << std::endl;
+					//---
+					//Modificar la recepcion y lectura de peticiones
+					//---
+					
+					std::string	request;
+
+					//GESTION REQUEST VACIA
+					request = readHttpRequest(evClient[n].data.fd);
+
+					//----------------------------
+					//Pruebas de parseo de request y checkeo
+
+					if (checkRequest(request))
+					{
+						/*for (std::vector<ServerConfig>::iterator it = list.begin() ; it < list.end(); it++)
+						{
+							if ((*it).getPort() == list);
+						}*/
+						ParseRequest	req(request);
+
+						int error = 0;
+						if ((error = req.checkProt()) != 0)
+						{
+							//request error
+						}
+						//Error por tamaño de request
+						//if (request.getLength() != std::string::npos && request.getLength() > ???)
+							//request error
+						
+						//---
+						//Location + Cgi
+						//---
+
+						//else
+						//{
+							//methods
+						//}
+
+						//else
+							//if ()
+								//redir
+
+						Response	response(&clientPort[evClient[n].data.fd]);
+
+						//Evento de escritura / mensaje
+						if (evClient[n].events & EPOLLIN)
+						{
+							if (req.getMethod() == "GET")
+								response.metodGet(evClient[n], req);//falta location
+							else if (req.getMethod() == "POST")
+								response.metodPost(evClient[n], req);
+							else if (req.getMethod() == "DELETE")
+								response.metodDelete(evClient[n], req);
+						}
+						std::cout << "--------------" << "\n";
+					}
+					//-----------------------------
+
 						// Procesar los datos recibidos del cliente
-						std::string response =
-					"HTTP/1.1 200 OK\r\n"
-					"Content-Type: text/html\r\n"
-					"Content-Length: " + std::to_string(html.size()) + "\r\n"
-					"\r\n" + html.c_str() ;
-						send(evClient[n].data.fd, response.c_str(), response.size(), 0);
-						close(evClient[n].data.fd);
+					/*if(true)
+						{
+							Cgi a("cgi/a.out","manolo pepe");
+							a.handlerCgi();
+							std::cout << a.get_output()<< "\n";
+							//response=Response(a.get_output()).get_web();
+
+						}
+				send(evClient[n].data.fd, response.c_str(), response.size(), 0);*/
+				close(evClient[n].data.fd);
 				}
 			}
 		
 	}
 }
+
+std::string	ServerUp::readHttpRequest(int socket)
+{
+	char		buff[MAX_REQUEST_SIZE + 1];
+	std::string	request;
+	size_t		bytes;
+
+	while ((bytes = recv(socket, buff, MAX_REQUEST_SIZE, 0)) > 0)
+	{
+		request += buff;
+		if (request.find("\r\n\r\n") != std::string::npos)
+			return request;
+	}
+	return "";
+}
+
 
 ServerUp::ServerUp()
 {
@@ -253,6 +319,6 @@ ServerUp::ServerUp()
 
 ServerUp::~ServerUp()
 {
-	//std::cout << "manolo";
+	std::cout << "manolo";
 }
 
