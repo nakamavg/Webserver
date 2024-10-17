@@ -1,22 +1,5 @@
 #include "../incs/Response.hpp"
 
-/*Response::Response (std::string &html)
-{
-    std::stringstream ss;
-    ss << html.size();
-
-    this->web =
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/html\r\n"
-        "Content-Length: " + ss.str() + "\r\n"
-        "\r\n" + html.c_str() ;
-}
-Response::~Response(){};
-std::string Response::get_web()
-{
-	return this->web;
-}*/
-
 Response::Response(void)
 {}
 
@@ -121,25 +104,23 @@ void	Response::sendPage(std::string page, epoll_event & client, std::string requ
 
 void	Response::sendError(int error, epoll_event & client)
 {
-	std::map<std::string, std::string> errorPages;
+	std::map<int, std::string> errorPages;
 	int fd;
 
-	//cojer las error pages del conf
-	//errorPages = _server[client.getServ()].getErrorPages();
-	if (!errorPages[ft_size_to_str(error)].empty() && errorPages[ft_size_to_str(error)].size() <= 0)
+	errorPages = _conf.getErrorPages();
+	if (!errorPages[error].empty() && errorPages[error].size() <= 0)
 	{
-		//raiz del servidor
-		fd = open(("html" + '/' + errorPages[ft_size_to_str(error)]).c_str(), O_RDONLY);
+		fd = open((_conf.getDefRoot()+ '/' + errorPages[error]).c_str(), O_RDONLY);
 		if (fd < 0)
 		{
 			std::cout << "Error: Error pages failed -> " << error << std::endl;
-			errorPages.erase(errorPages.find(ft_size_to_str(error)));
+			errorPages.erase(errorPages.find(error));
 			sendError(error, client);
 			return;
 		}
 		close(fd);
 		//raiz del servidor
-		sendPage("html" + '/' + errorPages[ft_size_to_str(error)], client, "", 200);
+		sendPage(_conf.getDefRoot() + '/' + errorPages[error], client, "", 200);
 	}
 	else
 	{
@@ -240,6 +221,46 @@ bool	Response::writePost(std::string path, epoll_event & client, std::string str
 	return true;
 }
 
+void	Response::listing(epoll_event & client, std::string url, std::string path)
+{
+	std::cout << "Directiry Listing\n";
+
+	DIR				*dir;
+	struct dirent	*ent;
+	std::string		data;
+
+	std::string	msg = "HTTP/1.1 200 OK\n";
+	msg += "Content-Type: text/html\n\n";
+	msg += "<!DOCTYPE html>\n<html>\n<body>\n<h1>" + url + "</h1>\n<pre>\n";
+
+	if ((dir = opendir(path.c_str())) != NULL)
+	{
+		while ((ent = readdir(dir)) != NULL)
+		{
+			std::string	name = ent->d_name;
+			if (name == "." || name == "..")
+				continue ;
+			std::string href = url + "/" + name;
+			msg += "<a href=\"" + href + "\">" + name + "</a>\n";
+		}
+		closedir(dir);
+	}
+	else
+	{
+		std::cout << "Error: directory listing" << std::endl;
+		sendError(500, client);
+		return ;
+	}
+
+	msg += "</pre>\n</body>\n</html>\n";
+
+	int i;
+	if ((i = send(client.data.fd, msg.c_str(), msg.length(), 0)) < 0)
+		sendError(500, client);
+	else if (i == 0)
+		sendError(400, client);
+}
+
 //METHODS
 void	Response::metodGet(epoll_event & client, ParseRequest & request)
 {
@@ -257,23 +278,14 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	std::map<std::string, Locations> map = _conf.getLocations();
 	struct Locations *location = NULL;
 
-	location = &_conf.getLocations()["Default"];
-	//Revisar
-	if (!location)
-		location = &_conf.getLocations()["Default"];
+	location = &_conf.getLocations()["url"];
 
-	//las location por sintaxis contienen un ';' al final / arreglar
-	location->path.erase(location->path.size()-1, location->path.size());
-	std::string	path = "." + location->path + url;
-	if (checkIndex(path, location->index.erase(location->index.size() - 1, location->index.size())))
-		std::cout << "123\n";
+	std::string	path = "." + _conf.getDefRoot() + url;
 	if (location && !location->index.empty() && checkIndex(path, location->index))
 	{
 		sendPage(path + location->index, client, request.getRequest(), 200);
 		return ;
 	}
-
-	std::cout  << path;
 
 	struct stat	stat_path;
 	int	fd = open(path.c_str(), O_RDONLY);
@@ -284,12 +296,13 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 		sendError(404, client);
 		return ;
 	}
+	//Preguntar por el dir listing
 	if (S_ISDIR(stat_path.st_mode))
 	{	
-		if (checkIndex(path, location->index) && !location)
-			sendPage(path + location->index, client, request.getRequest(), 200);
-		/*else if (_server[client.getServ()].getListing() && location && location->getListing())
-			listing(client, url, path);*/
+		if (checkIndex(path, _conf.getDefIndex()) && !location)
+			sendPage(path + _conf.getDefIndex(), client, request.getRequest(), 200);
+		else if (location && location->upload_enable)
+			listing(client, url, path);
 		else
 			sendError(404, client);
 	}
@@ -302,16 +315,22 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 {
 	std::cout << "Post Method\n";
 
+	std::string	url;
+	url = request.getRoute();
+
+	if (url.size() >= 64)
+	{
+		sendError(414, client);
+		return ;
+	}
+
 	std::map<std::string, Locations> map = _conf.getLocations();
-	struct Locations *location = NULL;
+	/*struct Locations *location = NULL;
 
-	location = &_conf.getLocations()["Default"];
+	location = &_conf.getLocations()[url];*/
 
-	//Revisar
-	if (!location)
-		location = &_conf.getLocations()["Default"];
-
-	std::string	path = location->path + request.getRoute();
+	std::string	path = _conf.getDefRoot() + request.getRoute();
+	//Revisar ruta especifica post
 	struct stat	stat_path;
 	lstat(path.c_str(), &stat_path);
 
@@ -379,15 +398,21 @@ void	Response::metodDelete(epoll_event & client, ParseRequest & request)
 {
 	std::cout << "Delete Method\n";
 
+	std::string	url;
+	url = request.getRoute();
+
+	if (url.size() >= 64)
+	{
+		sendError(414, client);
+		return ;
+	}
+
 	std::map<std::string, Locations> map = _conf.getLocations();
-	struct Locations *location = NULL;
+	/*struct Locations *location = NULL;
 
-	location = &_conf.getLocations()["Default"];
+	location = &_conf.getLocations()[url];*/
 
-	//Revisar
-	if (!location)
-		location = &_conf.getLocations()["Default"];
-	std::string	path = location->path + request.getRoute();
+	std::string	path = _conf.getDefRoot() + request.getRoute();
 	std::ifstream	fd(path.c_str());
 	if (!fd)
 	{

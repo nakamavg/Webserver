@@ -35,6 +35,7 @@ private:
 
 
 	std::string	readHttpRequest( int socket );
+	int		_reqErr;
 
 
 };
