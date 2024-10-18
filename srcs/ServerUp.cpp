@@ -133,6 +133,7 @@ ServerUp::ServerUp(const std::vector<ServerConfig> &raw) : nServers(0), list(raw
 	this->nServers = nserv;
 	std::cout << nServers << std::endl;
 }
+
 std::vector<int> ServerUp::get_SocketsOfServer()
 {
 	size_t	i;
@@ -222,74 +223,68 @@ void ServerUp::start()
 				}
 				if(evClient[n].events & EPOLLIN)
 				{
-					//---
-					//Modificar la recepcion y lectura de peticiones
-					//---
 					
 					std::string	request;
 
-					//GESTION REQUEST VACIA
 					request = readHttpRequest(evClient[n].data.fd);
 
-					//----------------------------
-					//Pruebas de parseo de request y checkeo
-
-					if (checkRequest(request))
+					if (evClient[n].events & EPOLLIN)
 					{
-						/*for (std::vector<ServerConfig>::iterator it = list.begin() ; it < list.end(); it++)
+						if (_reqErr < 0)
 						{
-							if ((*it).getPort() == list);
-						}*/
-						ParseRequest	req(request);
-
-						int error = 0;
-						if ((error = req.checkProt()) != 0)
-						{
-							//request error
+							std::cout << "Error: Recv failed" << std::endl;
+							//handle_request_error(500, _client[i], _read_set, i);
 						}
-						//Error por tamaño de request
-						//if (request.getLength() != std::string::npos && request.getLength() > ???)
-							//request error
-						
-						//---
-						//Location + Cgi
-						//---
-
-						//else
-						//{
-							//methods
-						//}
-
-						//else
-							//if ()
-								//redir
-						Response	response(clientPort[evClient[n].data.fd]);
-
-						//Evento de escritura / mensaje
-						if (evClient[n].events & EPOLLIN)
+						else if (_reqErr == 0)
 						{
-							if (req.getMethod() == "GET")
-								response.metodGet(evClient[n], req);//falta location
-							else if (req.getMethod() == "POST")
-								response.metodPost(evClient[n], req);
-							else if (req.getMethod() == "DELETE")
-								response.metodDelete(evClient[n], req);
+							std::cout << "Connection is closed" << std::endl;
+							//handle_request_error(0, _client[i], _read_set, i);
 						}
-						std::cout << "--------------" << "\n";
+						//posible error si la request es erronea
+						if (checkRequest(request) && evClient[n].events & EPOLLIN)
+						{
+							ParseRequest	req(request);
+							Response		response(clientPort[evClient[n].data.fd]);
+
+							int error = 0;
+							if ((error = req.checkProt()) != 0)
+							{
+								std::cout << "Error: Header" << std::endl;
+								//handle_request_error(ret, _client[i], _read_set, i);
+							}
+							if (req.getLength() != std::string::npos &&
+								req.getLength() > clientPort[evClient[n].data.fd].getClientMaxBodySize())
+							{
+								// Uncomment and handle the error as needed
+								// handle_request_error(413, _client[i], _read_set, i);
+							}
+							
+							//allow metod general
+
+							//else
+								//if ()
+									//redir
+							//comprobar q es cgi
+							/*if(true)
+							{
+								Cgi a("cgi/a.out","manolo pepe");
+								a.handlerCgi();
+								std::cout << a.get_output()<< "\n";
+								//response=Response(a.get_output()).get_web();
+
+							}*/
+							//else
+							//{
+								if (req.getMethod() == "GET")
+									response.metodGet(evClient[n], req);//falta location
+								else if (req.getMethod() == "POST")
+									response.metodPost(evClient[n], req);
+								else if (req.getMethod() == "DELETE")
+									response.metodDelete(evClient[n], req);
+							//}
+						}
 					}
-					//-----------------------------
-
-						// Procesar los datos recibidos del cliente
-					/*if(true)
-						{
-							Cgi a("cgi/a.out","manolo pepe");
-							a.handlerCgi();
-							std::cout << a.get_output()<< "\n";
-							//response=Response(a.get_output()).get_web();
-
-						}
-				send(evClient[n].data.fd, response.c_str(), response.size(), 0);*/
-				close(evClient[n].data.fd);
+					close(evClient[n].data.fd);
 				}
 			}
 		
@@ -305,9 +300,11 @@ std::string	ServerUp::readHttpRequest(int socket)
 	while ((bytes = recv(socket, buff, MAX_REQUEST_SIZE, 0)) > 0)
 	{
 		request += buff;
+		_reqErr += bytes;
 		if (request.find("\r\n\r\n") != std::string::npos)
 			return request;
 	}
+	_reqErr += bytes;
 	return "";
 }
 
