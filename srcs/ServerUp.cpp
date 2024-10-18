@@ -248,6 +248,7 @@ void ServerUp::start()
 								//if ()
 									//redir
 							//comprobar q es cgi
+							
 							/*if(true)
 							{
 								Cgi a("cgi/a.out","manolo pepe");

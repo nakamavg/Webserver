@@ -276,13 +276,27 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	std::map<std::string, Locations> map = _conf.getLocations();
 	struct Locations *location = NULL;
 
-	location = &_conf.getLocations()[url];
+	std::string	tmp = url;
+	tmp.erase(tmp.find_last_of('/'), tmp.size());
+	tmp.erase(0, 1);
+	location = &_conf.getLocations()[tmp];
 
 	std::string	path = "." + _conf.getDefRoot() + url;
-	if (!location->id.empty() && !location->index.empty() && checkIndex(path, location->index))
+	if (!location->id.empty() && location->cgi_dir)
 	{
-		sendPage(path + location->index, client, request.getRequest(), 200);
-		return ;
+		Cgi	cgi(path,request.getBodyCgi());
+		int status = 0;
+		if ((status = cgi.handlerCgi()) > 0)
+		{
+			sendError(status, client);
+			return ;
+		}
+		std::string output = cgi.cgiResponse();
+		
+		if(send(client.data.fd,output.c_str(),output.size(),0)<= 0)
+			sendError(500,client);
+		
+		return;
 	}
 	if (!location->id.empty() && !location->index.empty() && checkIndex(path, location->index))
 	{
@@ -327,11 +341,27 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 	}
 
 	std::map<std::string, Locations> map = _conf.getLocations();
-	/*struct Locations *location = NULL;
+	struct Locations *location = NULL;
 
-	location = &_conf.getLocations()[url];*/
+	location = &_conf.getLocations()[url];
 
 	std::string	path = _conf.getDefRoot() + request.getRoute();
+	if (!location->id.empty() && location->cgi_dir)
+	{
+		Cgi	cgi(path,request.getBodyCgi());
+		int status = 0;
+		if (status == cgi.handlerCgi())
+			{
+				sendError(status,client);
+				return ;
+			}
+		std::string output = cgi.cgiResponse();
+		
+		 if(send(client.data.fd,output.c_str(),output.size(),0)<= 0)
+		 	sendError(500,client);
+		
+		return;
+	}
 	//Revisar ruta especifica post
 	struct stat	stat_path;
 	lstat(path.c_str(), &stat_path);
@@ -339,7 +369,7 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 	if (S_ISDIR(stat_path.st_mode))
 	{
 		std::string	body = request.getFullBody();
-		std::string	file;
+		std::string	file; 
 	
 		if (!(request.getHeader().empty() && request.getBoundary().empty()))
 		{

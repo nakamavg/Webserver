@@ -1,8 +1,19 @@
 #include "../incs/Cgi.hpp"
 
+std::string &Cgi::cgiResponse (void)
+{
+    std::stringstream ss;
+    ss << output.size();
+
+    web =
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/html\r\n"
+        "Content-Length: " + ss.str() + "\r\n"
+        "\r\n" + output.c_str() ;
+    return web;
+}
 Cgi::Cgi(std::string _programName, std::string _queryString) : programName(_programName), queryString(_queryString)
 {}
-std::string & Cgi::get_output(){return this->output ;}
 
 int Cgi::handlerCgi()
 {
@@ -52,7 +63,7 @@ int Cgi::handlerCgi()
         buffer[nread] = '\0';
         std::string aux(buffer);
         output = aux;
-        return (200);
+        return (0);
         }
     }
     else

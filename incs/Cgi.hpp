@@ -9,10 +9,13 @@ public:
 	~Cgi() {}
 	// Métodos adicionales de la clase
 	int handlerCgi();
-	std::string &get_output();
+	std:: string &cgiResponse (void);
+
 
 private:
 	std::string programName;
 	std::string queryString;
 	std::string output;
+    std::string web;
+
 };
