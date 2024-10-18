@@ -75,6 +75,14 @@ class ServerConfig
         std::map<std::string, Locations> getLocations() const { return locations; }
         void setLocations(const std::map<std::string, Locations> &newLocations) { locations = newLocations; }
     
+        // Getter y Setter para default_root
+        std::string getDefRoot() const { return def_root; }
+        void setDefRoot(const std::string &newDef_root) { def_root = newDef_root; }
+
+         // Getter y Setter para default_index
+        std::string getDefIndex() const { return def_index; }
+        void setDefIndex(const std::string &newDef_index) { def_index = newDef_index; }
+
     private:
         // Configuración general del servidor
         std::string host;                               // Nombre del servidor para el manejo de virtual hosts
