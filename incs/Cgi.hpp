@@ -8,7 +8,7 @@ public:
 	// Destructor
 	~Cgi() {}
 	// Métodos adicionales de la clase
-	void handlerCgi();
+	int handlerCgi();
 	std::string &get_output();
 
 private:

@@ -284,6 +284,11 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 		sendPage(path + location->index, client, request.getRequest(), 200);
 		return ;
 	}
+	if (!location->id.empty() && !location->index.empty() && checkIndex(path, location->index))
+	{
+		sendPage(path + location->index, client, request.getRequest(), 200);
+		return ;
+	}
 
 	struct stat	stat_path;
 	int	fd = open(path.c_str(), O_RDONLY);

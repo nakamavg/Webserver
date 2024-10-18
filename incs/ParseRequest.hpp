@@ -31,8 +31,6 @@ class ParseRequest
 
         std::string     _request;
 
-        ServerConfig*   _conf;//
-
         ParseRequest( void );
 
     public:
@@ -60,6 +58,8 @@ class ParseRequest
 		std::string		getBoundary( void );
 		std::string		getBody( void );
         std::string     getFullBody( void );
+        std::string     getBodyCgi( void );
+
 		std::map<std::string, std::string>		getHeader( void );
 
         /*void ParseLine();

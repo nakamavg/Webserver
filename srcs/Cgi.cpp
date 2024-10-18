@@ -4,7 +4,7 @@ Cgi::Cgi(std::string _programName, std::string _queryString) : programName(_prog
 {}
 std::string & Cgi::get_output(){return this->output ;}
 
-void Cgi::handlerCgi()
+int Cgi::handlerCgi()
 {
     int fdaux[2];
     pipe(fdaux);
@@ -45,17 +45,19 @@ void Cgi::handlerCgi()
         if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
         {
             std::cerr << "El proceso hijo terminó con un error.\n";
-            output=ft_read("html/html400.html");
+            return(400);
         }
         else{
         int nread=read(fdaux[READ],&buffer ,sizeof(buffer));
         buffer[nread] = '\0';
         std::string aux(buffer);
         output = aux;
+        return (200);
         }
     }
     else
     {
         std::cerr << "Fork falló.\n";
     }
+    return 0;
 }

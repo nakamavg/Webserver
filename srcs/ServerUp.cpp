@@ -251,7 +251,9 @@ void ServerUp::start()
 							/*if(true)
 							{
 								Cgi a("cgi/a.out","manolo pepe");
-								a.handlerCgi();
+								int	status = 0;
+								if (status == a.handlerCgi())
+									handle_request_error(413, _client[i], _read_set, i;
 								std::cout << a.get_output()<< "\n";
 								//response=Response(a.get_output()).get_web();
 

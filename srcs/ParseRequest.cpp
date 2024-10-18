@@ -374,6 +374,10 @@ std::string	ParseRequest::getBoundary(void)
 {
 	return _boundary;
 }
+std::string	ParseRequest::getBodyCgi(void)
+{
+	return _cgi_body;
+}
 
 std::string	ParseRequest::getBody(void)
 {
