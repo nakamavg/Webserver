@@ -98,9 +98,8 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
             {
                 if (location.autoindex)
                     throw MyException("Error: duplicated directory_listing on location");
-
                 std::string value = line->substr(std::string("directory_listing ").length());
-                location.autoindex = (value == "on");
+                location.autoindex = (value == "on;");
             }
             else if (line->find("index") == 0)
             {
