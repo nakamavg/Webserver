@@ -14,7 +14,7 @@ struct Locations {
     std::string upload_dir;                     // Directorio para subir archivos
     bool upload_enable;                         // Habilitar la carga de archivos
     std::string path_info;                      // Ruta de información para el CGI
-    std::string cgi_extension;                  // Extensión de archivo que activa el CGI
+    bool cgi_dir;                  // Extensión de archivo que activa el CGI
 
     // Constructor por defecto
     Locations() 
@@ -28,7 +28,7 @@ struct Locations {
           upload_dir(""), 
           upload_enable(false), 
           path_info(""), 
-          cgi_extension("") {} // Puedes usar el inicializador para strings
+          cgi_dir(false) {} // Puedes usar el inicializador para strings
 };
 class WebServer;
 
