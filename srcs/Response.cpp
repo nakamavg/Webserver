@@ -119,7 +119,6 @@ void	Response::sendError(int error, epoll_event & client)
 			return;
 		}
 		close(fd);
-		//raiz del servidor
 		sendPage(_conf.getDefRoot() + '/' + errorPages[error], client, "", 200);
 	}
 	else
@@ -268,7 +267,6 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 
 	std::string	url;
 	url = request.getRoute();
-
 	if (url.size() >= 64)
 	{
 		sendError(414, client);
@@ -281,7 +279,7 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	location = &_conf.getLocations()[url];
 
 	std::string	path = "." + _conf.getDefRoot() + url;
-	if (location && !location->index.empty() && checkIndex(path, location->index))
+	if (!location->id.empty() && !location->index.empty() && checkIndex(path, location->index))
 	{
 		sendPage(path + location->index, client, request.getRequest(), 200);
 		return ;
@@ -296,12 +294,11 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 		sendError(404, client);
 		return ;
 	}
-	//Preguntar por el dir listing
 	if (S_ISDIR(stat_path.st_mode))
 	{
-		if (checkIndex(path, _conf.getDefIndex()) && !location)
+		if (checkIndex(path, _conf.getDefIndex()) && location->id.empty())
 			sendPage(path + _conf.getDefIndex(), client, request.getRequest(), 200);
-		else if (location && location->autoindex)
+		else if (!location->id.empty() && location->autoindex)
 			listing(client, url, path);
 		else
 			sendError(404, client);
@@ -407,7 +404,7 @@ void	Response::metodDelete(epoll_event & client, ParseRequest & request)
 		return ;
 	}
 
-	std::map<std::string, Locations> map = _conf.getLocations();
+	//std::map<std::string, Locations> map = _conf.getLocations();
 	/*struct Locations *location = NULL;
 
 	location = &_conf.getLocations()[url];*/

@@ -178,7 +178,7 @@ void ServerUp::start()
 		if (!setupServerSocket(*it, se[*it]))
 			continue ;
 		::bzero(&ev,sizeof(ev));	
-		ev.events = EPOLLIN;
+		ev.events = EPOLLIN | EPOLLOUT; 
 		ev.data.fd = *it;
 		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, *it, &ev) == -1)
 		{
@@ -279,6 +279,7 @@ std::string	ServerUp::readHttpRequest(int socket)
 	char		buff[MAX_REQUEST_SIZE + 1];
 	std::string	request;
 	size_t		bytes;
+	_reqErr = 0;
 
 	while ((bytes = recv(socket, buff, MAX_REQUEST_SIZE, 0)) > 0)
 	{
