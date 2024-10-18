@@ -47,6 +47,7 @@ class ServerConfig
         void manageLocationBracketVar(std::vector<std::string>::iterator line, Locations &location);
 
         void addLocation(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file);
+        void addErrors(std::string line);
 
         void printLocation(Locations location);
         void printServerConfig(ServerConfig sc);
