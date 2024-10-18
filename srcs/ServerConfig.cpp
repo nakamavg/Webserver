@@ -164,7 +164,7 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
         valueLine = cleanLine.substr(std::string("path_info ").length());
         location.path_info = valueLine;
     }
-    else if (line->find("cgi_extension") == 0)
+    else if (line->find("cgi_dir") == 0)
     {
         if (location.cgi_dir)
             throw MyException("Error: duplicated cgi_dir on location");
@@ -321,9 +321,7 @@ void ServerConfig::printLocation(Locations location)
         std::cout << "  Path Info: " << location.path_info << std::endl;
     }
 
-    if (!location.cgi_dir) {
-        std::cout << "  CGI Dir: " << location.cgi_dir << std::endl;
-    }
+        std::cout << "  CGI Dir: " << (location.cgi_dir ? "Enabled" : "Disabled") << std::endl;
     std::cout << std::endl;
 }
 
