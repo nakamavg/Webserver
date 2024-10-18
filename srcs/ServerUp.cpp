@@ -31,10 +31,6 @@ bool ServerUp::setupServerSocket(int serverSocket,
 	int	option;
 
 	option = 1;
-	std::cout << "en setupserverSocket" << std::endl;
-	std::cout << serverSocket << std::endl;
-	std::cout << serverAddress.sin_family << std::endl;
-	std::cout << serverAddress.sin_port << std::endl;
 	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
 			&option, sizeof(option)) < 0)
 	{
@@ -100,7 +96,7 @@ void ServerUp::newConect(int serverfd, int fdEpoll,std::map<int,ServerConfig> &s
 		setsocknonblock(newfd);
 	::bzero(&ev,sizeof(ev));
 		clientPort[newfd] = serverPort[serverfd];
-	ev.events = EPOLLIN;
+	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd= newfd;
 	if(epoll_ctl(fdEpoll,EPOLL_CTL_ADD,newfd, &ev)< 0)
 		perror("epoll control");
@@ -120,18 +116,15 @@ ServerUp::ServerUp(const std::vector<ServerConfig> &raw) : nServers(0), list(raw
 {
 	size_t	nserv;
 
-	std::cout << "pepe" << std::endl;
 
 	nserv = 0;
 	std::vector<ServerConfig>::iterator pailan = list.begin();
 	while (pailan != list.end())
 	{
-		std::cout << (*pailan).getHost() << std::endl;
-		std::cout << (*pailan++).getPort() << std::endl;
+		*pailan++;
 		nserv++;
 	}
 	this->nServers = nserv;
-	std::cout << nServers << std::endl;
 }
 
 std::vector<int> ServerUp::get_SocketsOfServer()
@@ -141,7 +134,6 @@ std::vector<int> ServerUp::get_SocketsOfServer()
 
 	std::vector<int> sockets;
 	i = 1;
-	std::cout << this->nServers << std::endl;
 	while (i <= this->nServers)
 	{
 		if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -149,11 +141,9 @@ std::vector<int> ServerUp::get_SocketsOfServer()
 			std::cerr << errno << std::endl;
 			continue ;
 		} 
-		std::cout << serverSocket << std::endl;
 		sockets.push_back(serverSocket);
 		i++;
 	}
-	std::cout << "no salgo de esta funcion" << std::endl;
 	return (sockets);
 }
 
@@ -183,7 +173,6 @@ void ServerUp::start()
 		perror("");
 		return ;
 	}
-	std::cout << "antes del for" << std::endl;
 	for (std::vector<int>::iterator it = vSockets.begin(); it != vSockets.end(); ++it)
 	{
 		if (!setupServerSocket(*it, se[*it]))
@@ -191,34 +180,28 @@ void ServerUp::start()
 		::bzero(&ev,sizeof(ev));	
 		ev.events = EPOLLIN;
 		ev.data.fd = *it;
-		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, *it, &ev) ==
-			-1)
+		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, *it, &ev) == -1)
 		{
 			perror("");
 			close(*it);
 			continue ;
 		}
-		std::cout << "patata" << std::endl;
 	}
 	// estructura para los eventos de conexiones de clientes
 	while (42)
 	{
 		// devuelve el numero de fds que han sido actualizados
-		std::cout << "antes del epoll wait" << std::endl;
 		fdac = epoll_wait(epoll_fd, evClient, MAX_EVENTS, -1);
 		if (fdac == -1)
 		{
 			perror("epoll_wait failed");
 			return ;
 		}
-		std::cout << "despues del wait" << std::endl;
 			for(int n = 0;n < fdac; n++)
 			{
 				if(int fdconnect = checkfd(evClient[n].data.fd))
 				{	
-					std::cout << fdconnect << std::endl;
 					 newConect(fdconnect,epoll_fd, serverPort, clientPort);
-					 std::cout << "despues del accept"<<std::endl;
 					 break;
 				}
 				if(evClient[n].events & EPOLLIN)
@@ -228,7 +211,7 @@ void ServerUp::start()
 
 					request = readHttpRequest(evClient[n].data.fd);
 
-					if (evClient[n].events & EPOLLIN)
+					if (evClient[n].events & EPOLLOUT)
 					{
 						if (_reqErr < 0)
 						{
@@ -315,6 +298,6 @@ ServerUp::ServerUp()
 
 ServerUp::~ServerUp()
 {
-	std::cout << "manolo";
+	std::cout << "Bye Bye Server" << std::endl;
 }
 
