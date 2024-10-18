@@ -264,7 +264,7 @@ void	Response::listing(epoll_event & client, std::string url, std::string path)
 //METHODS
 void	Response::metodGet(epoll_event & client, ParseRequest & request)
 {
-	std::cout << "Get Method\n";
+	std::cout << "Get Method" << std::endl;
 
 	std::string	url;
 	url = request.getRoute();
@@ -278,7 +278,7 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	std::map<std::string, Locations> map = _conf.getLocations();
 	struct Locations *location = NULL;
 
-	location = &_conf.getLocations()["url"];
+	location = &_conf.getLocations()[url];
 
 	std::string	path = "." + _conf.getDefRoot() + url;
 	if (location && !location->index.empty() && checkIndex(path, location->index))
@@ -298,10 +298,10 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	}
 	//Preguntar por el dir listing
 	if (S_ISDIR(stat_path.st_mode))
-	{	
+	{
 		if (checkIndex(path, _conf.getDefIndex()) && !location)
 			sendPage(path + _conf.getDefIndex(), client, request.getRequest(), 200);
-		else if (location && location->upload_enable)
+		else if (location && location->autoindex)
 			listing(client, url, path);
 		else
 			sendError(404, client);
@@ -313,7 +313,7 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 
 void	Response::metodPost(epoll_event & client, ParseRequest & request)
 {
-	std::cout << "Post Method\n";
+	std::cout << "Post Method" << std::endl;
 
 	std::string	url;
 	url = request.getRoute();
