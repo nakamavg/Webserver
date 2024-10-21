@@ -121,6 +121,9 @@ ServerUp::ServerUp(const std::vector<ServerConfig> &raw) : nServers(0), list(raw
 	std::vector<ServerConfig>::iterator pailan = list.begin();
 	while (pailan != list.end())
 	{
+		std::cout << "You can " << GREEN << "connect" << NC <<" to:" << std::endl;
+		std::cout << (*pailan).getHost() <<  ":" << (*pailan).getPort() << std::endl;
+
 		*pailan++;
 		nserv++;
 	}

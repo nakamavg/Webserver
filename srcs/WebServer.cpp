@@ -105,10 +105,10 @@ void    WebServer::parseFile()
     if (brackets !=0)
         throw MyException("Error: Check the brackets!");
     
-    int i = 1;
-    for (std::vector<ServerConfig>::iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
-    {
-        std::cout << "\033[32m" << "------ Server " << i++ << "  ------" << "\033[0m" << std::endl;
-       (*it).printServerConfig((*it));
-    }
+    // int i = 1;
+    // for (std::vector<ServerConfig>::iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it)
+    // {
+    //     std::cout << "\033[32m" << "------ Server " << i++ << "  ------" << "\033[0m" << std::endl;
+    //    (*it).printServerConfig((*it));
+    // }
 }

@@ -47,7 +47,9 @@ void ServerConfig::addLocation(std::vector<std::string>::iterator &line, std::ve
     // Aquí usas `loc.id` como clave para el mapa
     //std::cout << "Adding location: " << loc.id << std::endl; // Debug output
 
-    if (locations.size() == 0)
+    //std::cout << "location id: " << loc.id << loc.id.empty() << std::endl;
+
+    if (loc.id.empty() == 1)
         loc.id = "Default";
     locations[loc.id] = loc; // Inserta el objeto en el mapa
 

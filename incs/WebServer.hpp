@@ -14,6 +14,12 @@
 # include "ServerConfig.hpp"
 # include "ParseUtils.hpp"
 
+
+const char* const RED = "\033[0;31m";
+const char* const GREEN = "\033[0;32m";
+const char* const YELLOW = "\033[0;33m";
+const char* const NC = "\033[0m";
+
 class ServerConfig;
 class WebServer
 {

@@ -1,32 +1,46 @@
 #include "../incs/WebServer.hpp"
 #include "../incs/ServerUp.hpp"
 
+
 int main(int argc, char **argv)
 {
-    std::string fileName;
-
-    if (argc == 1)
-        fileName = "default.conf";
-    else if (argc == 2)
+    std::string fileName = "default.conf";
+    
+    if (argc == 2)
+    {
         fileName = argv[1];
-    else
-        return (std::cout << "Usage: ./testeo [filename].conf" << std::endl, 2);
+    } else if (argc > 2)
+    {
+        return (std::cout << "Usage: ./testeo [filename].conf <--(optional)" << std::endl, 2);
+    }
 
-    try
-        {
+    int attempt = 0;
+    
+    while (attempt < 2) {
+        try {
+            std::cout << std::endl;
+            std::cout << "Reading file: " << YELLOW << fileName << NC << "...." << std::endl;
+
             WebServer ws;
-            
             ws.validFileName(fileName);
             ws.readConfFile(fileName);
             ws.parseFile();
-            ServerUp a(ws.getServerConfigs());
-            a.start();
-            
-            // std::cout << "Number of servers found: " << ws.getServerConfigs().size()  << std::endl;
-            // std::cout << "Number of locations on the 1st server: " << ws.getServerConfigs()[0].getLocations().size() << std::endl;
+            ServerUp server(ws.getServerConfigs());
+            server.start();
+            return 0;
         }
-        catch(const std::exception& e)
+        catch (const std::exception& e)
         {
             std::cerr << e.what() << '\n';
+            attempt++;
+            // we switch to default if the other filename is provided
+            if (attempt == 1 && fileName != "default.conf")
+            {
+                fileName = "default.conf";
+            }
         }
+    }
+
+    std::cerr << "Both attempts failed. Exiting." << std::endl;
+    return 1;
 }
