@@ -283,7 +283,8 @@ std::string	ServerUp::readHttpRequest(int socket)
 
 void	ServerUp::handle_request_error(int error, epoll_event client, Response response)
 {
-	response.sendError(error, client);
+	if (error > 0)
+		response.sendError(error, client);
 	if (client.data.fd)
 		close(client.data.fd);
 }
