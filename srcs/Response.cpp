@@ -260,6 +260,24 @@ void	Response::listing(epoll_event & client, std::string url, std::string path)
 		sendError(400, client);
 }
 
+void	Response::redir(epoll_event & client, std::string redir)
+{
+	std::cout << "Redirect to: " << redir << std::endl;
+
+	std::string	msg = "HTTP/1.1 200 OK\n\n";
+	msg += "<head><meta http-equiv=\"refresh\" content = \"0;url=";
+	msg += redir;
+	msg += "\" /></head>";
+
+	int i;
+
+	i = 0;
+	if ((i = send(client.data.fd, msg.c_str(), msg.length(), 0)) < 0)
+		sendError(500, client);
+	else if (i == 0)
+		sendError(400, client);
+}
+
 
 //METHODS
 void	Response::metodGet(epoll_event & client, ParseRequest & request)
@@ -305,6 +323,8 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 		
 		return;
 	}
+	if (location && !location->redirect.empty())
+		redir(client, location->redirect);
 	if (location && !location->index.empty() && checkIndex(path, location->index))
 	{
 		sendPage(path + location->index, client, request.getRequest(), 200);
@@ -314,7 +334,8 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	struct stat	stat_path;
 	int	fd = open(path.c_str(), O_RDONLY);
 	stat(path.c_str(), &stat_path);
-	if (!S_ISDIR(stat_path.st_mode) && fd <= 0)
+
+	if (fd <= 0)
 	{
 		sendError(404, client);
 		return ;

@@ -40,7 +40,7 @@ class Response
 		void	sendChuncked( std::string, epoll_event & client, int error );
 		bool	writePost( std::string path, epoll_event & client, std::string str );
 		void	listing(epoll_event &client, std::string url, std::string path);
-
+		void	redir( epoll_event & client, std::string redir );
 
 	//METHODS
 		void	metodGet( epoll_event & client, ParseRequest & request);
