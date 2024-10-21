@@ -8,7 +8,7 @@
 #include "Cgi.hpp"
 
 
-
+class Response;
 class WebServer;
 class ServerUp {
 public:
@@ -35,6 +35,7 @@ private:
 
 
 	std::string	readHttpRequest( int socket );
+	void		handle_request_error(int error, epoll_event client, Response response);
 	int		_reqErr;
 
 

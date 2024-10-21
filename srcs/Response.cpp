@@ -260,6 +260,7 @@ void	Response::listing(epoll_event & client, std::string url, std::string path)
 		sendError(400, client);
 }
 
+
 //METHODS
 void	Response::metodGet(epoll_event & client, ParseRequest & request)
 {

@@ -210,7 +210,8 @@ void ServerUp::start()
 				if(evClient[n].events & EPOLLIN)
 				{
 					
-					std::string	request;
+					std::string		request;
+					Response		response(clientPort[evClient[n].data.fd]);
 
 					request = readHttpRequest(evClient[n].data.fd);
 
@@ -219,58 +220,40 @@ void ServerUp::start()
 						if (_reqErr < 0)
 						{
 							std::cout << "Error: Recv failed" << std::endl;
-							//handle_request_error(500, _client[i], _read_set, i);
+							handle_request_error(500, evClient[n], response);
 						}
 						else if (_reqErr == 0)
 						{
 							std::cout << "Connection is closed" << std::endl;
-							//handle_request_error(0, _client[i], _read_set, i);
+							handle_request_error(0, evClient[n], response);
 						}
 						//posible error si la request es erronea
 						if (checkRequest(request) && evClient[n].events & EPOLLIN)
 						{
 							ParseRequest	req(request);
-							Response		response(clientPort[evClient[n].data.fd]);
 
 							int error = 0;
 							if ((error = req.checkProt()) != 0)
 							{
 								std::cout << "Error: Header" << std::endl;
-								//handle_request_error(ret, _client[i], _read_set, i);
+								handle_request_error(error ,evClient[n], response);
 							}
 							if (req.getLength() != std::string::npos &&
 								req.getLength() > clientPort[evClient[n].data.fd].getClientMaxBodySize())
-							{
-								// Uncomment and handle the error as needed
-								// handle_request_error(413, _client[i], _read_set, i);
-							}
-							
-							//allow metod general
+								handle_request_error(413, evClient[n], response);
 
 							//else
 								//if ()
 									//redir
-							//comprobar q es cgi
-							
-							/*if(true)
+							else
 							{
-								Cgi a("cgi/a.out","manolo pepe");
-								int	status = 0;
-								if (status == a.handlerCgi())
-									handle_request_error(413, _client[i], _read_set, i;
-								std::cout << a.get_output()<< "\n";
-								//response=Response(a.get_output()).get_web();
-
-							}*/
-							//else
-							//{
 								if (req.getMethod() == "GET")
-									response.metodGet(evClient[n], req);//falta location
+									response.metodGet(evClient[n], req);
 								else if (req.getMethod() == "POST")
 									response.metodPost(evClient[n], req);
 								else if (req.getMethod() == "DELETE")
 									response.metodDelete(evClient[n], req);
-							//}
+							}
 						}
 					}
 					close(evClient[n].data.fd);
@@ -298,6 +281,12 @@ std::string	ServerUp::readHttpRequest(int socket)
 	return "";
 }
 
+void	ServerUp::handle_request_error(int error, epoll_event client, Response response)
+{
+	response.sendError(error, client);
+	if (client.data.fd)
+		close(client.data.fd);
+}
 
 ServerUp::ServerUp()
 {
