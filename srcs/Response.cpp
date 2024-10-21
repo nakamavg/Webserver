@@ -285,10 +285,11 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 		dir.erase(dir.rfind("/"), dir.size());
 		dir.erase(0, dir.rfind("/") + 1);
 	}
-	location = &_conf.getLocations()[dir];
+	if (map.find(dir) != map.end())
+		location = &map[dir];
 
 	std::string	path = "." + _conf.getDefRoot() + url;
-	if (!location->id.empty() && location->cgi_dir)
+	if (location && location->cgi_dir)
 	{
 		Cgi	cgi(path,request.getBodyCgi());
 		int status = 0;
@@ -304,7 +305,7 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 		
 		return;
 	}
-	if (!location->id.empty() && !location->index.empty() && checkIndex(path, location->index))
+	if (location && !location->index.empty() && checkIndex(path, location->index))
 	{
 		sendPage(path + location->index, client, request.getRequest(), 200);
 		return ;
@@ -320,9 +321,9 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	}
 	if (S_ISDIR(stat_path.st_mode))
 	{
-		if (checkIndex(path, _conf.getDefIndex()) && location->id.empty())
+		if (checkIndex(path, _conf.getDefIndex()) && !location)
 			sendPage(path + _conf.getDefIndex(), client, request.getRequest(), 200);
-		else if (!location->id.empty() && location->index.empty() && location->autoindex)
+		else if (location && location->index.empty() && location->autoindex)
 			listing(client, url, path);
 		else
 			sendError(404, client);
@@ -355,11 +356,11 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 		dir.erase(dir.rfind("/"), dir.size());
 		dir.erase(0, dir.rfind("/") + 1);
 	}
-
-	location = &_conf.getLocations()[dir];
+	if (map.find(dir) != map.end())
+		location = &map[dir];
 
 	std::string	path = "." + _conf.getDefRoot() + url;
-	if (!location->id.empty() && location->cgi_dir)
+	if (location && location->cgi_dir)
 	{
 		Cgi	cgi(path,request.getBodyCgi());
 		int status = 0;

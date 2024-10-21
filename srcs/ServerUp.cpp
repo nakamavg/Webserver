@@ -179,7 +179,11 @@ void ServerUp::start()
 	for (std::vector<int>::iterator it = vSockets.begin(); it != vSockets.end(); ++it)
 	{
 		if (!setupServerSocket(*it, se[*it]))
+		{
+			vSockets.erase(it);
+			it--;
 			continue ;
+		}
 		::bzero(&ev,sizeof(ev));	
 		ev.events = EPOLLIN | EPOLLOUT; 
 		ev.data.fd = *it;
