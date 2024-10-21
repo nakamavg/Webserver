@@ -195,6 +195,16 @@ ParseRequest::ParseRequest(std::string _raw_request)
 		makeGet(strs);
 	else if (_method == "POST")
 		makePost(strs);
+
+	size_t		pos;
+	_url = getRoute();
+	if ((pos = _url.rfind("?")) != std::string::npos)
+	{
+		_cgi_body = _url.substr(pos, _url.size());
+		_url = _url.substr(0, pos);
+	}
+	else
+		_cgi_body = getBody();
 }
 
 ParseRequest::ParseRequest(const ParseRequest & source)
@@ -358,6 +368,11 @@ std::string	ParseRequest::getMethod(void)
 std::string	ParseRequest::getRoute(void)
 {
 	return _route;
+}
+
+std::string	ParseRequest::getUrl(void)
+{
+	return _url;
 }
 
 std::string	ParseRequest::getProtocol(void)

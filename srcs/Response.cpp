@@ -239,7 +239,7 @@ void	Response::listing(epoll_event & client, std::string url, std::string path)
 			std::string	name = ent->d_name;
 			if (name == "." || name == "..")
 				continue ;
-			std::string href = url + "/" + name;
+			std::string href = url + name;
 			msg += "<a href=\"" + href + "\">" + name + "</a>\n";
 		}
 		closedir(dir);
@@ -266,7 +266,8 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	std::cout << "Get Method" << std::endl;
 
 	std::string	url;
-	url = request.getRoute();
+	url = request.getUrl();
+
 	if (url.size() >= 64)
 	{
 		sendError(414, client);
@@ -276,10 +277,14 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	std::map<std::string, Locations> map = _conf.getLocations();
 	struct Locations *location = NULL;
 
-	std::string	tmp = url;
-	tmp.erase(tmp.find_last_of('/'), tmp.size());
-	tmp.erase(0, 1);
-	location = &_conf.getLocations()[tmp];
+	std::string	dir = url;
+
+	if (dir != "/")
+	{
+		dir.erase(dir.rfind("/"), dir.size());
+		dir.erase(0, dir.rfind("/") + 1);
+	}
+	location = &_conf.getLocations()[dir];
 
 	std::string	path = "." + _conf.getDefRoot() + url;
 	if (!location->id.empty() && location->cgi_dir)
@@ -307,8 +312,7 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	struct stat	stat_path;
 	int	fd = open(path.c_str(), O_RDONLY);
 	stat(path.c_str(), &stat_path);
-
-	if (fd <= 0)
+	if (!S_ISDIR(stat_path.st_mode) && fd <= 0)
 	{
 		sendError(404, client);
 		return ;
@@ -317,7 +321,7 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	{
 		if (checkIndex(path, _conf.getDefIndex()) && location->id.empty())
 			sendPage(path + _conf.getDefIndex(), client, request.getRequest(), 200);
-		else if (!location->id.empty() && location->autoindex)
+		else if (!location->id.empty() && location->index.empty() && location->autoindex)
 			listing(client, url, path);
 		else
 			sendError(404, client);
@@ -332,7 +336,7 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 	std::cout << "Post Method" << std::endl;
 
 	std::string	url;
-	url = request.getRoute();
+	url = request.getUrl();
 
 	if (url.size() >= 64)
 	{
@@ -342,24 +346,32 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 
 	std::map<std::string, Locations> map = _conf.getLocations();
 	struct Locations *location = NULL;
+	
+	std::string	dir = url;
 
-	location = &_conf.getLocations()[url];
+	if (dir != "/")
+	{
+		dir.erase(dir.rfind("/"), dir.size());
+		dir.erase(0, dir.rfind("/") + 1);
+	}
 
-	std::string	path = _conf.getDefRoot() + request.getRoute();
+	location = &_conf.getLocations()[dir];
+
+	std::string	path = "." + _conf.getDefRoot() + url;
 	if (!location->id.empty() && location->cgi_dir)
 	{
 		Cgi	cgi(path,request.getBodyCgi());
 		int status = 0;
-		if (status == cgi.handlerCgi())
-			{
-				sendError(status,client);
-				return ;
-			}
+		if ((status = cgi.handlerCgi()) > 0)
+		{
+			sendError(status,client);
+			return ;
+		}
 		std::string output = cgi.cgiResponse();
-		
-		 if(send(client.data.fd,output.c_str(),output.size(),0)<= 0)
-		 	sendError(500,client);
-		
+
+		if(send(client.data.fd,output.c_str(),output.size(),0) <= 0)
+			sendError(500,client);
+
 		return;
 	}
 	//Revisar ruta especifica post
@@ -431,7 +443,7 @@ void	Response::metodDelete(epoll_event & client, ParseRequest & request)
 	std::cout << "Delete Method\n";
 
 	std::string	url;
-	url = request.getRoute();
+	url = request.getUrl();
 
 	if (url.size() >= 64)
 	{

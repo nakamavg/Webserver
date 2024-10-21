@@ -40,7 +40,7 @@ int Cgi::handlerCgi()
         };
         close(fdaux[READ]); 
         dup2(fdaux[WRITE], STDOUT_FILENO);
-        close(fdaux[WRITE]); 
+        close(fdaux[WRITE]);
         execve(argv[0], argv, envp);
 
        // perror(""); 

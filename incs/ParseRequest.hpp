@@ -19,6 +19,7 @@ class ParseRequest
         std::string     _html;
         std::string     _method;
         std::string     _route;
+        std::string     _url;
         std::string     _version;
         std::string     _cgi_body;
         std::string     _boundary;
@@ -35,8 +36,6 @@ class ParseRequest
 
     public:
 
-        //ParseRequest(std::string _raw_request, std::vector<ServerConfig> &list);
-
         ParseRequest( std::string _raw_request );
         ParseRequest( const ParseRequest& source );
         ParseRequest & operator=( const ParseRequest & source );
@@ -52,6 +51,7 @@ class ParseRequest
 		std::string		getRequest( void );
 		std::string		getMethod( void );
 		std::string		getRoute( void );
+        std::string     getUrl( void );
 		std::string		getProtocol( void );
 		size_t			getLength( void );
 
@@ -61,11 +61,6 @@ class ParseRequest
         std::string     getBodyCgi( void );
 
 		std::map<std::string, std::string>		getHeader( void );
-
-        /*void ParseLine();
-        void ParseHead();
-        void ParseBody();
-        void HasChunked();*/
 
 };
 
