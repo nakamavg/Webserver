@@ -1,5 +1,6 @@
 #pragma once 
 #include "Libs.hpp"
+#define TIMEOUT 5
 class Cgi {
 public:
 	// Constructor
@@ -10,7 +11,8 @@ public:
 	// Métodos adicionales de la clase
 	int handlerCgi();
 	std:: string &cgiResponse (void);
-
+	void executeChildProcess(int fdaux[2]);
+	int handleParentProcess(int fdaux[2], pid_t pid);
 
 private:
 	std::string programName;
