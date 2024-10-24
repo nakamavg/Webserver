@@ -70,7 +70,10 @@ std::string &Cgi::cgiResponse(void)
 
     web =
         "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/html\r\n"
+        "Content-Type: text/html\r\n";
+    if (!userLogin.empty())
+        web += "Set-Cookie: " + userLogin + "; Max-Age=3600; Path=/\r\n";
+    web +=
         "Content-Length: " + ss.str() + "\r\n"
         "\r\n" + output.c_str();
     return web;
@@ -113,6 +116,14 @@ int Cgi::handlerCgi()
             {
                 // Si el proceso CGI terminó, matar el proceso de timeout
                 kill(timeout_pid, SIGKILL);
+                std::string userLogin;
+                if (queryString.find("User=") != std::string::npos)
+                {
+                    userLogin = queryString;
+                    userLogin.erase(0, userLogin.find("User=") + 5);
+                    if (userLogin.find("&") != std::string::npos)
+                        userLogin.erase(userLogin.find("&"), userLogin.size());
+                }
                 return handleParentProcess(fdaux, pid);
             }
             else

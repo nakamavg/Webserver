@@ -10,6 +10,7 @@ public:
 	~Cgi() {}
 	// Métodos adicionales de la clase
 	int handlerCgi();
+	std::string cgiResponse(std::string c);
 	std:: string &cgiResponse (void);
 	void executeChildProcess(int fdaux[2]);
 	int handleParentProcess(int fdaux[2], pid_t pid);
@@ -19,5 +20,6 @@ private:
 	std::string queryString;
 	std::string output;
     std::string web;
+	std::string userLogin;
 
 };
