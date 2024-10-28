@@ -100,7 +100,7 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
 
     cleanLine.erase(cleanLine.size() - 1);
 
-    if (line->find("root") == 0)
+    if (cleanLine.compare(0, 5, "root ") == 0)
     {
         if (location.path != "")
             throw MyException("Error: duplicated root on location");
@@ -108,7 +108,7 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
         valueLine = cleanLine.substr(std::string("root ").length());
         location.path = valueLine;
     }
-    else if (line->find("allow_methods") == 0)
+    else if (cleanLine.compare(0, 14, "allow_methods ") == 0)
     {
         if (!location.allowed_methods.empty())
             throw MyException("Error: duplicated allow_methods on location");
@@ -116,7 +116,7 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
         valueLine = cleanLine.substr(std::string("allow_methods ").length());
         location.allowed_methods = parseMethods(valueLine);
     }
-    else if (line->find("directory_listing") == 0)
+    else if (cleanLine.compare(0, 18, "directory_listing ") == 0)
     {
         if (location.autoindex)
             throw MyException("Error: duplicated directory_listing on location");
@@ -124,7 +124,7 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
         valueLine = cleanLine.substr(std::string("directory_listing ").length());
         location.autoindex = (valueLine == "on");
     }
-    else if (line->find("index") == 0)
+    else if (cleanLine.compare(0, 6, "index ") == 0)
     {
         if (!location.index.empty())
             throw MyException("Error: duplicated index on location");
@@ -132,7 +132,7 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
         valueLine = cleanLine.substr(std::string("index ").length());
         location.index = valueLine;
     }
-    else if (line->find("default_file") == 0)
+    else if (cleanLine.compare(0, 13, "default_file ") == 0)
     {
         if (!location.default_file.empty())
             throw MyException("Error: duplicated default_file on location");
@@ -140,7 +140,7 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
         valueLine = cleanLine.substr(std::string("default_file ").length());
         location.default_file = valueLine;
     }
-    else if (line->find("upload_dir") == 0)
+    else if (cleanLine.compare(0, 11, "upload_dir ") == 0)
     {
         if (!location.upload_dir.empty())
             throw MyException("Error: duplicated upload_dir on location");
@@ -148,15 +148,16 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
         valueLine = cleanLine.substr(std::string("upload_dir ").length());
         location.upload_dir = valueLine;
     }
-    else if (line->find("upload_enable") == 0)
+    else if (cleanLine.compare(0, 14, "upload_enable ") == 0)
     {
         if (location.upload_enable)
             throw MyException("Error: duplicated upload_enable on location");
 
+        std::cout << "patatatatatata" << std::endl;
         valueLine = cleanLine.substr(std::string("upload_enable ").length());
         location.upload_enable = (valueLine == "on");
     }
-    else if (line->find("path_info") == 0)
+    else if (cleanLine.compare(0, 10, "path_info ") == 0)
     {
         if (!location.path_info.empty())
             throw MyException("Error: duplicated path_info on location");
@@ -164,7 +165,7 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
         valueLine = cleanLine.substr(std::string("path_info ").length());
         location.path_info = valueLine;
     }
-    else if (line->find("cgi_dir") == 0)
+    else if (cleanLine.compare(0, 8, "cgi_dir ") == 0)
     {
         if (location.cgi_dir)
             throw MyException("Error: duplicated cgi_dir on location");
@@ -172,7 +173,7 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
         valueLine = cleanLine.substr(std::string("cgi_dir ").length());
         location.cgi_dir = (valueLine == "on");
     }
-    else if (line->find("return") == 0)
+    else if (cleanLine.compare(0, 7, "return ") == 0)
     {
         if (!location.redirect.empty())
             throw MyException ("Error: duplicated return on location");
@@ -232,47 +233,57 @@ void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &li
     std::string cleanLine = *line;
     std::string valueLine;
 
-    cleanLine.erase(cleanLine.size() - 1);
+    cleanLine.erase(cleanLine.size() - 1); // Elimina el último carácter, que podría ser un ';' o un espacio
 
-    if (line->find("listen") == 0)
+    if (cleanLine.compare(0, 7, "listen ") == 0)
     {
-        if ((sc.port != 0) || sc.host !="")
-            throw MyException ("Error: duplicated listen on server");
+        if ((sc.port != 0) || sc.host != "")
+            throw MyException("Error: duplicated listen on server");
 
         valueLine = cleanLine.substr(std::string("listen ").length());
         parseIpAddress(valueLine, sc);
     }
-    else if (line->find("server_name") == 0)
+    else if (cleanLine.compare(0, 12, "server_name ") == 0)
     {
         if (!(sc.server_names).empty())
-            throw MyException ("Error: duplicated server_name on server");
+            throw MyException("Error: duplicated server_name on server");
 
         valueLine = cleanLine.substr(std::string("server_name ").length());
         sc.server_names.push_back(valueLine);
     }
-    else if (line->find("client_max_body_size") == 0)
+    else if (cleanLine.compare(0, 21, "client_max_body_size ") == 0)
     {
         if (sc.client_max_body_size != 0)
-            throw MyException ("Error: duplicated client_max_body_size on server");
+            throw MyException("Error: duplicated client_max_body_size on server");
 
         valueLine = cleanLine.substr(std::string("client_max_body_size ").length());
         parseCmbs(valueLine, sc);
     }
-    else if (line->find("error_page") == 0)
+    else if (cleanLine.compare(0, 11, "error_page ") == 0)
     {
         valueLine = cleanLine.substr(std::string("error_page ").length());
         addErrors(valueLine);
         sc.setErrorPages(error_pages);
     }
-    else if (line->find("root") == 0)
+    else if (cleanLine.compare(0, 5, "root ") == 0)
     {
+        if (!(sc.def_root).empty())
+            throw MyException("Error: duplicated root on server");
+
         valueLine = cleanLine.substr(std::string("root ").length());
         sc.def_root = valueLine;
     }
-    else if (line->find("index") == 0)
+    else if (cleanLine.compare(0, 6, "index ") == 0)
     {
+        if (!(sc.def_index).empty())
+            throw MyException("Error: duplicated index on server");
+
         valueLine = cleanLine.substr(std::string("index ").length());
         sc.def_index = valueLine;
+    }
+    else
+    {
+        throw MyException("Error: Syntax error on server");
     }
 }
 
