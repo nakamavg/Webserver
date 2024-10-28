@@ -415,7 +415,7 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 
 	if (S_ISDIR(stat_path.st_mode))
 	{
-		std::string	body = request.getFullBody();
+		std::string	body = request.getBody();
 		std::string	file; 
 	
 		if (!(request.getHeader().empty() && request.getBoundary().empty()))
@@ -464,7 +464,7 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 
 		std::cout << "POST IN FILE\n";
 
-		if (!writePost(path, client, request.getFullBody()))
+		if (!writePost(path, client, request.getBody()))
 			return ;
 	}
 	if (request.getLength() == 0)
