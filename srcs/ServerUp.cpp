@@ -10,8 +10,6 @@ void ServerUp::sigHandler(int signum)
 {
     std::cout << "Interrupt signal (" << signum << ") received.\n";
 
-    // Limpiar recursos
-    // Salir del programa
 	g_sig = 1;
     return ;
 }
@@ -32,12 +30,12 @@ int		setsocknonblock(int sock)
 	flag = fcntl(sock, F_GETFL, 0);
 	if (flag < 0)
 	{
-		perror("fnclt");
+		std::cerr << "fnclt" << std::endl;
 		return (0);
 	}
 	if (fcntl(sock, F_SETFL, flag | O_NONBLOCK) < 0)
 	{
-		perror("fnctl");
+		std::cerr << "fnctl" << std::endl;
 		return (0);
 	}
 	return (1);
@@ -51,20 +49,20 @@ bool ServerUp::setupServerSocket(int serverSocket,
 	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
 			&option, sizeof(option)) < 0)
 	{
-		perror("");
+		std::cerr << "Set Sock Error" << std::endl;
 		close(serverSocket);
 		return (false);
 	}
 	if (bind(serverSocket, (struct sockaddr *)&serverAddress,
 			sizeof(serverAddress)) < 0)
 	{
-		perror("");
+		std::cerr << "Bind Error" << std::endl;
 		close(serverSocket);
 		return (false);
 	}
 	if (listen(serverSocket, SOMAXCONN) < 0)
 	{
-		perror("");
+		std::cerr << "Listen Error" << std::endl;
 		return (false);
 	}
 	return (true);
@@ -107,7 +105,7 @@ void ServerUp::newConect(int serverfd, int fdEpoll,std::map<int,ServerConfig> &s
 		}
 		else
 		{
-			perror("accept()");
+			std::cerr << "accept()" << std::endl;
 		}
 	}
 		setsocknonblock(newfd);
@@ -116,7 +114,7 @@ void ServerUp::newConect(int serverfd, int fdEpoll,std::map<int,ServerConfig> &s
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd= newfd;
 	if(epoll_ctl(fdEpoll,EPOLL_CTL_ADD,newfd, &ev)< 0)
-		perror("epoll control");
+		std::cerr << "epoll control" << std::endl;
 
 }
 
@@ -194,7 +192,7 @@ void ServerUp::start()
 	
 	if (epoll_fd == -1)
 	{
-		perror("");
+		std::cerr << "" << std::endl;
 		return ;
 	}
 	for (std::vector<int>::iterator it = vSockets.begin(); it != vSockets.end(); ++it)
@@ -210,11 +208,13 @@ void ServerUp::start()
 		ev.data.fd = *it;
 		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, *it, &ev) == -1)
 		{
-			perror("");
+			std::cerr << "" << std::endl;
 			close(*it);
 			continue ;
 		}
 	}
+	if (vSockets.size() == 0)
+		return ;
 	// estructura para los eventos de conexiones de clientes
 	while (42)
 	{
