@@ -205,6 +205,7 @@ ParseRequest::ParseRequest(std::string _raw_request)
 	}
 	else
 		_cgi_body = getBody();
+	
 }
 
 ParseRequest::ParseRequest(const ParseRequest & source)

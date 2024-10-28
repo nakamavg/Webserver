@@ -264,10 +264,10 @@ void	Response::redir(epoll_event & client, std::string redir)
 {
 	std::cout << "Redirect to: " << redir << std::endl;
 
-	std::string	msg = "HTTP/1.1 200 OK\n\n";
-	msg += "<head><meta http-equiv=\"refresh\" content = \"0;url=";
+	std::string	msg = "HTTP/1.1 302 OK\n\n";
+	msg += "<head>\n<meta http-equiv=\"Refresh\" content = \"0;URL=";
 	msg += redir;
-	msg += "\" /></head>";
+	msg += "\" />\n</head>";
 
 	int i;
 
@@ -309,6 +309,8 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 	std::string	path = "." + _conf.getDefRoot() + url;
 	if (location && location->cgi_dir)
 	{
+		//std::string cookie = request.getHeader().find("Cookie")->second;
+	
 		Cgi	cgi(path,request.getBodyCgi());
 		int status = 0;
 		if ((status = cgi.handlerCgi()) > 0)
@@ -324,7 +326,10 @@ void	Response::metodGet(epoll_event & client, ParseRequest & request)
 		return;
 	}
 	if (location && !location->redirect.empty())
+	{
 		redir(client, location->redirect);
+		return ;
+	}
 	if (location && !location->index.empty() && checkIndex(path, location->index))
 	{
 		sendPage(path + location->index, client, request.getRequest(), 200);
@@ -383,6 +388,7 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 	std::string	path = "." + _conf.getDefRoot() + url;
 	if (location && location->cgi_dir)
 	{
+		
 		Cgi	cgi(path,request.getBodyCgi());
 		int status = 0;
 		if ((status = cgi.handlerCgi()) > 0)
@@ -400,6 +406,12 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 	//Revisar ruta especifica post
 	struct stat	stat_path;
 	lstat(path.c_str(), &stat_path);
+
+	if (!location || !location->upload_enable)
+	{
+		sendError(400, client);
+		return ;
+	}
 
 	if (S_ISDIR(stat_path.st_mode))
 	{
