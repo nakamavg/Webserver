@@ -265,7 +265,7 @@ void	Response::redir(epoll_event & client, std::string redir)
 	std::cout << "Redirect to: " << redir << std::endl;
 
 	std::string	msg = "HTTP/1.1 302 OK\n\n";
-	msg += "<head>\n<meta http-equiv=\"Refresh\" content = \"0;URL=";
+	msg += "<head>\n<meta http-equiv=\"Refresh\" content=\"0;URL=";
 	msg += redir;
 	msg += "\" />\n</head>";
 
