@@ -7,7 +7,7 @@ NC = \033[0m # No color (reiniciar)
 #Comandos
 DEL			=	rm -f
 CC			=	c++
-CFLAGS = -Wall -Wextra -Werror -std=c++98   
+CFLAGS = -Wall -Wextra -Werror -g3 -std=c++98   
 RM = rm -rf
 
 #Nombre ejecutable

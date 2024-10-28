@@ -1,6 +1,9 @@
 #pragma once 
 #include "Libs.hpp"
 #define TIMEOUT 5
+#define ROUTE_PHP "/usr/bin/php"
+#define ROUTE_PYTHON "/usr/bin/python3"
+
 class Cgi {
 public:
 	// Constructor
@@ -14,6 +17,7 @@ public:
 	std:: string &cgiResponse (void);
 	void executeChildProcess(int fdaux[2]);
 	int handleParentProcess(int fdaux[2], pid_t pid);
+	void getVariable(std::string variable);
 
 private:
 	std::string programName;
@@ -21,5 +25,6 @@ private:
 	std::string output;
     std::string web;
 	std::string userLogin;
+	std::string cookie;
 
 };

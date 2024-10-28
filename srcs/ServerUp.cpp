@@ -1,4 +1,27 @@
 #include "../incs/ServerUp.hpp"
+ServerUp* ServerUp::instance = NULL;
+
+void ServerUp::sigHandler(int signum)
+{
+    std::cout << "Interrupt signal (" << signum << ") received.\n";
+
+    // Limpiar recursos
+    if (instance != NULL) {
+        for (std::vector<int>::iterator it = instance->vSockets.begin(); it != instance->vSockets.end(); ++it)
+        {
+            close(*it);
+        }
+        if (instance->epoll_fd != -1)
+        {
+            close(instance->epoll_fd);
+        }
+        instance->vSockets.clear();
+    }
+
+    // Salir del programa
+    exit(signum);
+}
+
 int ServerUp::checkfd(int fd)
 {
 for (std::vector<int>::iterator it = vSockets.begin(); it != vSockets.end(); ++it)
@@ -152,7 +175,8 @@ std::vector<int> ServerUp::get_SocketsOfServer()
 
 void ServerUp::start()
 {
-	int			epoll_fd;
+	instance = this;
+	signal(SIGINT, sigHandler);
 	epoll_event	evClient[MAX_EVENTS];
 	int			fdac;
 	//char		buffer[99999];
@@ -271,18 +295,16 @@ std::string	ServerUp::readHttpRequest(int socket)
 {
 	char		buff[MAX_REQUEST_SIZE + 1];
 	std::string	request;
-	size_t		bytes;
+	ssize_t		bytes;
 	_reqErr = 0;
 
 	while ((bytes = recv(socket, buff, MAX_REQUEST_SIZE, 0)) > 0)
 	{
 		request += buff;
 		_reqErr += bytes;
-		if (request.find("\r\n\r\n") != std::string::npos)
-			return request;
 	}
 	_reqErr += bytes;
-	return "";
+	return request;
 }
 
 void	ServerUp::handle_request_error(int error, epoll_event client, Response response)
@@ -299,6 +321,7 @@ ServerUp::ServerUp()
 
 ServerUp::~ServerUp()
 {
+	vSockets.clear();	
 	std::cout << "Bye Bye Server" << std::endl;
 }
 
