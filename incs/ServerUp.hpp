@@ -6,6 +6,7 @@
 #include "ParseRequest.hpp"
 #include "Response.hpp"
 #include "Cgi.hpp"
+#include <netdb.h>
 
 
 class Response;

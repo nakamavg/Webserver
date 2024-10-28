@@ -16,13 +16,10 @@ int Cgi::handleParentProcess(int fdaux[2], pid_t pid)
     int status;
     char buffer[2048];
 
-    // Cerrar el extremo de escritura del pipe
     close(fdaux[WRITE]);
 
-    // Esperar a que el proceso hijo termine
     waitpid(pid, &status, 0);
 
-    // Comprobar si el proceso hijo terminó con éxito
     if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
     {
         std::cerr << "El proceso hijo terminó con un error.\n";
@@ -30,7 +27,6 @@ int Cgi::handleParentProcess(int fdaux[2], pid_t pid)
     }
     else
     {
-        // Leer la salida del proceso hijo
         int nread = read(fdaux[READ], &buffer, sizeof(buffer));
         buffer[nread] = '\0';
         std::string aux(buffer);
@@ -48,7 +44,6 @@ void Cgi::executeChildProcess(int fdaux[2])
     char *argv[4];
     std::cout << "El nombre del programa es: " << programName << std::endl;
 
-    // Configuración del comando a ejecutar según el tipo de archivo
     if (programName.find(".py") != std::string::npos)
         argv[0] = strdup(ROUTE_PYTHON);
     else if(programName.find(".php") != std::string::npos)
@@ -59,7 +54,6 @@ void Cgi::executeChildProcess(int fdaux[2])
     argv[1] = strdup(programName.c_str());
     argv[2] = NULL;
 
-    // Configuración de las variables de entorno
     std::string query_string_env = "QUERY_STRING=" + queryString;
     std::cout<<queryString << std::endl;
     char *envp[] = {
@@ -67,15 +61,12 @@ void Cgi::executeChildProcess(int fdaux[2])
         NULL
     };
 
-    // Redirección de la salida estándar al pipe
     close(fdaux[READ]);
     dup2(fdaux[WRITE], STDOUT_FILENO);
     close(fdaux[WRITE]);
 
-    // Ejecución del programa CGI
     execve(argv[0], argv, envp);
 
-    // En caso de error, se cierra el proceso con un código de fallo
     exit(EXIT_FAILURE);
 }
 
@@ -112,37 +103,34 @@ int Cgi::handlerCgi()
 
     if (pid == 0)
     {
-        // Proceso hijo: ejecutar el proceso CGI
         executeChildProcess(fdaux);
     }
     else if (pid > 0)
     {
-        // Proceso padre: manejar el timeout
         pid_t timeout_pid = fork();
 
         if (timeout_pid == 0)
         {
-            // Proceso hijo del timeout: dormir por el tiempo de timeout
-            sleep(5); // Timeout de 5 segundos
-            kill(pid, SIGKILL); // Matar el proceso CGI si aún está corriendo
+            sleep(TIMEOUT); 
+            kill(pid, SIGKILL); 
             exit(EXIT_SUCCESS);
         }
         else if (timeout_pid > 0)
         {
-            // Proceso padre: manejar el proceso CGI y el proceso de timeout
+     
             int status;
-            waitpid(pid, &status, 0); // Esperar a que el proceso CGI termine
+            waitpid(pid, &status, 0); 
 
             if (WIFEXITED(status))
             {
-                // Si el proceso CGI terminó, matar el proceso de timeout
+          
                 kill(timeout_pid, SIGKILL);
                 return handleParentProcess(fdaux, pid);
             }
             else
             {
                 std::cerr << "El proceso CGI fue terminado por el timeout.\n";
-                return 408; // Request Timeout
+                return 408; 
             }
         }
         else

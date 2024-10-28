@@ -3,7 +3,7 @@ int g_sig = 0;
 
 void	ServerUp::setSig(int i)
 {
-	_sig = i;
+	g_sig = i;
 }
 
 void ServerUp::sigHandler(int signum)
@@ -67,10 +67,7 @@ bool ServerUp::setupServerSocket(int serverSocket,
 	}
 	return (true);
 }
-/*
-Inicializa la structura creando un mapa donde la clave es el fd y el valor es la estructura
-recorriendo el array de clases de los servidores
-*/
+
 void ServerUp::GenStruct(std::map<int, sockaddr_in> *servers,
 	std::vector<int> *sockets,std::map<int,ServerConfig> *serverPort)
 {
@@ -82,11 +79,31 @@ void ServerUp::GenStruct(std::map<int, sockaddr_in> *servers,
 	{
 		::bzero(&serverAddress, sizeof(sockaddr_in));
 		serverAddress.sin_family = AF_INET;
-		serverAddress.sin_addr.s_addr = inet_addr(list[i].getHost().c_str());
+
+		struct addrinfo hints, *res;
+		::bzero(&hints, sizeof(hints));
+		hints.ai_family = AF_INET; // IPv4
+		hints.ai_socktype = SOCK_STREAM;
+
+		int status = getaddrinfo(list[i].getHost().c_str(), NULL, &hints, &res);
+		if (status != 0)
+		{
+			std::cout <<" hola "<<list[i].getHost() << std::endl;
+			std::cerr << "getaddrinfo error: " << gai_strerror(status) << std::endl;
+			// Manejar el error adecuadamente
+			list.erase(list.begin() + i);
+			nServers--;
+			continue;
+		}
+
+		struct sockaddr_in *ipv4 = (struct sockaddr_in *)res->ai_addr;
+		serverAddress.sin_addr = ipv4->sin_addr;
 		serverAddress.sin_port = htons(list[i].getPort());
+
 		servers->insert(std::make_pair((*sockets)[i], serverAddress));
 		serverPort->insert(std::make_pair((*sockets)[i], list[i]));
 
+		freeaddrinfo(res); // Liberar la memoria asignada por getaddrinfo
 		i++;
 	}
 }
@@ -172,10 +189,8 @@ void ServerUp::start()
 	signal(SIGINT, sigHandler);
 	epoll_event	evClient[MAX_EVENTS];
 	int			fdac;
-	//char		buffer[99999];
 	std::string response;
 	epoll_event	ev;
-	std::string html =ft_read("html/index.html");
 
 
 	std::map<int, sockaddr_in> se;
@@ -186,8 +201,6 @@ void ServerUp::start()
 		return ;
 	vSockets = get_SocketsOfServer();
 	GenStruct(&se, &vSockets, &serverPort);
-	// este es el primer epoll para serverver;
-	// vamos a generar la estructura que necesitamos para los eventos de nuevos servers
 	epoll_fd = epoll_create(MAX_EVENTS);
 	
 	if (epoll_fd == -1)
@@ -215,10 +228,14 @@ void ServerUp::start()
 	}
 	if (vSockets.size() == 0)
 		return ;
-	// estructura para los eventos de conexiones de clientes
 	while (42)
 	{
-		// devuelve el numero de fds que han sido actualizados
+		std::cout << "Number of servers: " << nServers << std::endl;
+		if(nServers == 0)
+			break;
+		std::cout << "Waiting for connections..." << std::endl;
+		if(g_sig == 1)
+			break;
 		fdac = epoll_wait(epoll_fd, evClient, MAX_EVENTS, -1);
 		if (fdac == -1)
 		{
@@ -252,7 +269,7 @@ void ServerUp::start()
 							std::cout << "Connection is closed" << std::endl;
 							handle_request_error(0, evClient[n], response);
 						}
-						//posible error si la request es erronea
+					
 						if (checkRequest(request) && evClient[n].events & EPOLLIN)
 						{
 							ParseRequest	req(request);
@@ -267,9 +284,6 @@ void ServerUp::start()
 								req.getLength() > clientPort[evClient[n].data.fd].getClientMaxBodySize())
 								handle_request_error(413, evClient[n], response);
 
-							//else
-								//if ()
-									//redir
 							else
 							{
 								if (req.getMethod() == "GET")

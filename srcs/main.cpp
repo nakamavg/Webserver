@@ -33,7 +33,6 @@ int main(int argc, char **argv)
         {
             std::cerr << e.what() << '\n';
             attempt++;
-            // we switch to default if the other filename is provided
             if (attempt == 1 && fileName != "default.conf")
             {
                 fileName = "default.conf";
