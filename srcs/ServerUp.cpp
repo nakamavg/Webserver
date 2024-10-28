@@ -300,7 +300,8 @@ std::string	ServerUp::readHttpRequest(int socket)
 
 	while ((bytes = recv(socket, buff, MAX_REQUEST_SIZE, 0)) > 0)
 	{
-		request += buff;
+		buff[bytes] = '\0';
+		request.append(buff, bytes);
 		_reqErr += bytes;
 	}
 	_reqErr += bytes;
