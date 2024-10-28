@@ -1,25 +1,19 @@
 #include "../incs/ServerUp.hpp"
-ServerUp* ServerUp::instance = NULL;
+int g_sig = 0;
+
+void	ServerUp::setSig(int i)
+{
+	_sig = i;
+}
 
 void ServerUp::sigHandler(int signum)
 {
     std::cout << "Interrupt signal (" << signum << ") received.\n";
 
     // Limpiar recursos
-    if (instance != NULL) {
-        for (std::vector<int>::iterator it = instance->vSockets.begin(); it != instance->vSockets.end(); ++it)
-        {
-            close(*it);
-        }
-        if (instance->epoll_fd != -1)
-        {
-            close(instance->epoll_fd);
-        }
-        instance->vSockets.clear();
-    }
-
     // Salir del programa
-    exit(signum);
+	g_sig = 1;
+    return ;
 }
 
 int ServerUp::checkfd(int fd)
@@ -128,6 +122,7 @@ void ServerUp::newConect(int serverfd, int fdEpoll,std::map<int,ServerConfig> &s
 
 ServerUp::ServerUp(const std::string &ip, size_t port) : ip(ip), port(port)
 {
+	_sig = 0;
 }
 
 size_t ServerUp::getNservers()
@@ -151,6 +146,7 @@ ServerUp::ServerUp(const std::vector<ServerConfig> &raw) : nServers(0), list(raw
 		nserv++;
 	}
 	this->nServers = nserv;
+	_sig = 0;
 }
 
 std::vector<int> ServerUp::get_SocketsOfServer()
@@ -175,7 +171,6 @@ std::vector<int> ServerUp::get_SocketsOfServer()
 
 void ServerUp::start()
 {
-	instance = this;
 	signal(SIGINT, sigHandler);
 	epoll_event	evClient[MAX_EVENTS];
 	int			fdac;
@@ -189,6 +184,8 @@ void ServerUp::start()
 	std::map<int, ServerConfig> serverPort;
 	std::map<int, ServerConfig> clientPort;
 
+	if (_sig == 1)
+		return ;
 	vSockets = get_SocketsOfServer();
 	GenStruct(&se, &vSockets, &serverPort);
 	// este es el primer epoll para serverver;
@@ -225,7 +222,7 @@ void ServerUp::start()
 		fdac = epoll_wait(epoll_fd, evClient, MAX_EVENTS, -1);
 		if (fdac == -1)
 		{
-			perror("epoll_wait failed");
+			std::cerr << "epoll_wait failed" << std::endl;
 			return ;
 		}
 			for(int n = 0;n < fdac; n++)
