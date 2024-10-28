@@ -40,6 +40,8 @@ private:
 	void		handle_request_error(int error, epoll_event client, Response response);
 	int		_reqErr;
 	int epoll_fd;
+	int _sig;
 
+	void	setSig(int i);
 
 };
