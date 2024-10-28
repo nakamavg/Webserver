@@ -39,8 +39,6 @@ ServerConfig &ServerConfig::operator=(const ServerConfig &src)
 }
 
 
-
-
 void ServerConfig::addLocation(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file)
 {
     Locations loc = manageLocationBracket(line, raw_file);
@@ -220,9 +218,11 @@ ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterato
     line--;    //volvemos atras para evaluar el }
     line--;
     //std::cout << "Number of Locations in this server: " << locations.size() << std::endl;
-    std::cout << "port: " << sc.port << " host: " << sc.host << " index: " << sc.def_index << " root: " << sc.def_root << std::endl;
+    //std::cout << "port: " << sc.port << " host: " << sc.host << " index: " << sc.def_index << " root: " << sc.def_root << std::endl;
     if (sc.port == 0 || sc.host.empty() || sc.def_index.empty() || sc.def_root.empty())
         throw MyException("Error: Missing info to be able to open the server");
+    if (sc.client_max_body_size == 0)
+        sc.setClientMaxBodySize(120);
     sc.setLocations(getLocations());
     return sc;
 }

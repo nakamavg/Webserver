@@ -5,7 +5,7 @@
 int main(int argc, char **argv)
 {
     std::string fileName = "default.conf";
-    
+    int attempt = 0;
     if (argc == 2)
     {
         fileName = argv[1];
@@ -14,7 +14,7 @@ int main(int argc, char **argv)
         return (std::cout << "Usage: ./testeo [filename].conf <--(optional)" << std::endl, 2);
     }
 
-    int attempt = 0;
+
     
     while (attempt < 2) {
         try {
@@ -38,6 +38,8 @@ int main(int argc, char **argv)
             {
                 fileName = "default.conf";
             }
+            else
+                break;
         }
     }
 
