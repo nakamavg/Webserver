@@ -93,22 +93,25 @@ ParseRequest::ParseRequest(std::string _raw_request)
 	else
 		_cgi_body = getBody();
 
-	std::stringstream	strs2(_full_body);
-	std::string			line;
-	while (std::getline(strs2, line))
+	if (!_boundary.empty())
 	{
-		if (line.find(_boundary) != std::string::npos)
+		std::stringstream	strs2(_full_body);
+		std::string			line;
+		while (std::getline(strs2, line))
 		{
-			while (line[0] != 13 && std::getline(strs2, line))
-			{}
+			if (line.find(_boundary) != std::string::npos)
+			{
+				while (line[0] != 13 && std::getline(strs2, line))
+				{}
+			}
+			std::getline(strs2, line);
+			if (!(line.find(_boundary) != std::string::npos))
+				_rBody += line;
+			if (!line.empty())
+				_rBody += '\n';
 		}
-		std::getline(strs2, line);
-		if (!(line.find(_boundary) != std::string::npos))
-			_rBody += line;
-		if (!line.empty())
-			_rBody += '\n';
+		_rBody.erase(_rBody.size() - 2, _rBody.size() -1);
 	}
-	_rBody.erase(_rBody.size() - 2, _rBody.size() -1);
 }
 
 ParseRequest::ParseRequest(const ParseRequest & source)
