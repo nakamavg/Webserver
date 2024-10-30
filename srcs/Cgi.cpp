@@ -42,6 +42,7 @@ int Cgi::handleParentProcess(int fdaux[2], pid_t pid)
 void Cgi::executeChildProcess(int fdaux[2])
 {
     char *argv[4];
+    std::cout << "El nombre del programa es: " << programName << std::endl;
 
     if (programName.find(".py") != std::string::npos)
         argv[0] = strdup(ROUTE_PYTHON);
@@ -54,6 +55,7 @@ void Cgi::executeChildProcess(int fdaux[2])
     argv[2] = NULL;
 
     std::string query_string_env = "QUERY_STRING=" + queryString;
+    std::cout<<queryString << std::endl;
     char *envp[] = {
         strdup(query_string_env.c_str()),
         NULL
@@ -88,12 +90,15 @@ std::string &Cgi::cgiResponse(void)
 
 Cgi::Cgi(std::string _programName, std::string _queryString) : programName(_programName), queryString(_queryString)
 {
+    std::cout << "El programa es: " << programName << std::endl;
+    std::cout << "La query es: " << queryString << std::endl;
 }
 
 int Cgi::handlerCgi()
 {
     int fdaux[2];
     pipe(fdaux);
+    std::cout << "la query de mi amor es: " << queryString << std::endl;
     pid_t pid = fork();
 
     if (pid == 0)
