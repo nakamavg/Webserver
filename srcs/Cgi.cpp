@@ -136,7 +136,7 @@ int Cgi::handlerCgi()
     }
     else
     {
-        std::cerr << "Fork falló.\n";
+        std::cerr << "Fork failed.\n";
         return 500;
     }
     return 0;
