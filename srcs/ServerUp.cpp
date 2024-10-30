@@ -88,9 +88,8 @@ void ServerUp::GenStruct(std::map<int, sockaddr_in> *servers,
 		int status = getaddrinfo(list[i].getHost().c_str(), NULL, &hints, &res);
 		if (status != 0)
 		{
-			std::cout <<" hola "<<list[i].getHost() << std::endl;
 			std::cerr << "getaddrinfo error: " << gai_strerror(status) << std::endl;
-			// Manejar el error adecuadamente
+		
 			list.erase(list.begin() + i);
 			nServers--;
 			continue;
@@ -103,7 +102,7 @@ void ServerUp::GenStruct(std::map<int, sockaddr_in> *servers,
 		servers->insert(std::make_pair((*sockets)[i], serverAddress));
 		serverPort->insert(std::make_pair((*sockets)[i], list[i]));
 
-		freeaddrinfo(res); // Liberar la memoria asignada por getaddrinfo
+		freeaddrinfo(res); 
 		i++;
 	}
 }
