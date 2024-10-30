@@ -41,6 +41,16 @@
 			border-radius: 50%;
 			cursor: pointer;
 		}
+		
+		.member img[src*="anurtiag.jpeg"] {
+			filter: grayscale(100%);
+			transform: rotate(45deg);
+		}
+	</style>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+</head>
+<body>
+	
 	</style>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
 </head>
@@ -48,25 +58,29 @@
 	<h1>Bienvenido a la página de testeo de 42 Webserver para Annton, Endika y David</h1>
 
 	<div class="button-container">
-		<button class="button" onclick="window.location.href = 'cgi.html';">CGI</button>
+		<button class="button" onclick="window.location.href = 'menu.html';">CGI</button>
 		<button class="button" onclick="window.location.href = 'get.html';">GET</button>
-		<button class="button" onclick="window.location.href = 'post.html';">POST</button>
+		<button class="button" onclick="window.location.href = 'upload.html';">POST</button>
 	</div>
-
+	<div class="member">
+		<a href="https://github.com/masla-la/"> 
+			<img src="https://cdn.intra.42.fr/users/de7552ef2b7eca17868f909797942aa6/masla-la.jpeg" alt="Foto de David">
+		</a>
+	</div>
+	<div class="member">
+		<a href="https://github.com/Mimenza"> 
+			<img src="	https://cdn.intra.42.fr/users/f6d16331bad940039705fe1f90b83b6d/emimenza.jpeg" alt="Foto de Endika">
+		</a>
+	</div>
+	<div class="member">
+		<a href="https://github.com/nakamavg/"> 
+			<img src="https://cdn.intra.42.fr/users/30ced65d42f010ff91eb885a7c96e775/dgomez-m.jpeg" alt="Foto de David">
+		</a>
+	</div>
 	<div class="member-container">
 		<div class="member">
 			<a href="https://github.com/annton"> 
 				<img src="https://cdn.intra.42.fr/users/a3bf1101c1980c29a913126c8ed5a2f2/anurtiag.jpeg" alt="Foto de Annton">
-			</a>
-		</div>
-		<div class="member">
-			<a href="https://github.com/Mimenza"> 
-				<img src="	https://cdn.intra.42.fr/users/f6d16331bad940039705fe1f90b83b6d/emimenza.jpeg" alt="Foto de Endika">
-			</a>
-		</div>
-		<div class="member">
-			<a href="https://github.com/nakamavg/"> 
-				<img src="https://cdn.intra.42.fr/users/30ced65d42f010ff91eb885a7c96e775/dgomez-m.jpeg" alt="Foto de David">
 			</a>
 		</div>
 	</div>

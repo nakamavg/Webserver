@@ -219,6 +219,16 @@ bool	Response::writePost(std::string path, epoll_event & client, std::string str
     }
 
     fd.close();
+	ssize_t	i = 0;
+	std::string msg = "HTTP/1.1 303 See Other\r\n"
+						"Location: \r\n"
+						"Content-Length: 0\r\n"
+						"\r\n";
+	if ((i = send(client.data.fd, msg.c_str(), msg.size(), 0	)) <= 0)
+	{
+		return false;
+	}
+	
     return true;
 }
 
@@ -463,14 +473,9 @@ void	Response::metodDelete(epoll_event & client, ParseRequest & request)
 		return ;
 	}
 
-	//std::map<std::string, Locations> map = _conf.getLocations();
-	/*struct Locations *location = NULL;
-
-	location = &_conf.getLocations()[url];*/
-
-	std::string	path = _conf.getDefRoot() + request.getRoute();
+	std::string	path = "." + _conf.getDefRoot() + request.getRoute();
 	std::ifstream	fd(path.c_str());
-	if (!fd)
+	if (!fd.is_open())
 	{
 		sendError(404, client);
 		return ;

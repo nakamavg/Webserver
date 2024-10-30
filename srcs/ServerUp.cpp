@@ -228,12 +228,12 @@ void ServerUp::start()
 	}
 	if (vSockets.size() == 0)
 		return ;
+	std::cout << "Number of servers: " << nServers << std::endl;
+			std::cout << "Waiting for connections..." << std::endl;
 	while (42)
 	{
-			std::cout << "Number of servers: " << nServers << std::endl;
 			if(nServers == 0)
 				break;
-			std::cout << "Waiting for connections..." << std::endl;
 			if(g_sig == 1)
 				break;
 			fdac = epoll_wait(epoll_fd, evClient, MAX_EVENTS, -1);
@@ -314,6 +314,7 @@ std::string	ServerUp::readHttpRequest(int socket)
 		buff[bytes] = '\0';
 		request.append(buff, bytes);
 		_reqErr += bytes;
+
 	}
 	_reqErr += bytes;
 	return request;
