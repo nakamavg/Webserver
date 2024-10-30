@@ -230,28 +230,28 @@ void ServerUp::start()
 		return ;
 	while (42)
 	{
-		std::cout << "Number of servers: " << nServers << std::endl;
-		if(nServers == 0)
-			break;
-		std::cout << "Waiting for connections..." << std::endl;
-		if(g_sig == 1)
-			break;
-		fdac = epoll_wait(epoll_fd, evClient, MAX_EVENTS, -1);
-		if (fdac == -1)
-		{
-			std::cerr << "epoll_wait failed" << std::endl;
-			return ;
-		}
+			std::cout << "Number of servers: " << nServers << std::endl;
+			if(nServers == 0)
+				break;
+			std::cout << "Waiting for connections..." << std::endl;
+			if(g_sig == 1)
+				break;
+			fdac = epoll_wait(epoll_fd, evClient, MAX_EVENTS, -1);
+			if (fdac == -1)
+			{
+				std::cerr << "epoll_wait failed" << std::endl;
+				return ;
+			}
 			for(int n = 0;n < fdac; n++)
 			{
 				if(int fdconnect = checkfd(evClient[n].data.fd))
 				{	
-					 newConect(fdconnect,epoll_fd, serverPort, clientPort);
-					 break;
+					newConect(fdconnect,epoll_fd, serverPort, clientPort);
+					break;
 				}
 				if(evClient[n].events & EPOLLIN)
 				{
-					
+						
 					std::string		request;
 					Response		response(clientPort[evClient[n].data.fd]);
 
@@ -269,7 +269,7 @@ void ServerUp::start()
 							std::cout << "Connection is closed" << std::endl;
 							handle_request_error(0, evClient[n], response);
 						}
-					
+						
 						if (checkRequest(request) && evClient[n].events & EPOLLIN)
 						{
 							ParseRequest	req(request);

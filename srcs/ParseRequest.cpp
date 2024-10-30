@@ -92,7 +92,6 @@ ParseRequest::ParseRequest(std::string _raw_request)
 	}
 	else
 		_cgi_body = getBody();
-
 	if (!_boundary.empty())
 	{
 		std::stringstream	strs2(_full_body);
@@ -102,16 +101,22 @@ ParseRequest::ParseRequest(std::string _raw_request)
 			if (line.find(_boundary) != std::string::npos)
 			{
 				while (line[0] != 13 && std::getline(strs2, line))
-				{}
+				{
+					if (line.find("filename=") != std::string::npos)
+					{
+						_fileName = line;
+						_fileName.erase(0, _fileName.find("filename=") + 10);
+						_fileName.erase(_fileName.size() - 2, _fileName.size());
+					}
+				}
+				std::getline(strs2, line);
 			}
-			std::getline(strs2, line);
-			if (!(line.find(_boundary) != std::string::npos))
-				_rBody += line;
-			if (!line.empty())
-				_rBody += '\n';
+			if (!(line.find(_boundary) != std::string::npos) && !strs2.eof())
+				_rBody += line + '\n';
 		}
-		_rBody.erase(_rBody.size() - 2, _rBody.size() -1);
 	}
+	if (!_rBody.empty())
+		_rBody.erase(_rBody.size() - 2, _rBody.size() - 1);
 }
 
 ParseRequest::ParseRequest(const ParseRequest & source)
@@ -296,6 +301,12 @@ std::string	ParseRequest::getBoundary(void)
 {
 	return _boundary;
 }
+
+std::string	ParseRequest::getFileName(void)
+{
+	return _fileName;
+}
+
 std::string	ParseRequest::getBodyCgi(void)
 {
 	return _cgi_body;

@@ -203,21 +203,23 @@ void	Response::sendChuncked(std::string page, epoll_event & client, int error)
 
 bool	Response::writePost(std::string path, epoll_event & client, std::string str)
 {
-	int	fd = open(path.c_str(), O_WRONLY | O_TRUNC | O_CREAT, 0644);
-	if (fd < 0)
-	{
-		sendError(500, client);
-		return false;
-	}
+	std::ofstream fd(path.c_str());
 
-	if (!write(fd, str.c_str(), str.length()))
+    if (!fd.is_open())
 	{
-		sendError(500, client);
-		close(fd);
-		return false;
-	}
-	close(fd);
-	return true;
+        sendError(500, client);
+        return false;
+    }
+
+    if (!(fd << str))
+	{
+        sendError(500, client);
+        fd.close();
+        return false;
+    }
+
+    fd.close();
+    return true;
 }
 
 void	Response::listing(epoll_event & client, std::string url, std::string path)
@@ -416,41 +418,17 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 	if (S_ISDIR(stat_path.st_mode))
 	{
 		std::string	body = request.getBody();
-		std::string	file; 
 	
 		if (!(request.getHeader().empty() && request.getBoundary().empty()))
 		{
 
 			std::cout << "Post in directory: " << std::endl;
 
-			size_t start = 0;
-			while (true)
+			std::cout << path + request.getFileName() << "\n";
+			if (!writePost(path + request.getFileName(), client, request.getBody()))
 			{
-				start = body.find("name=\"", start);
-				if (start == std::string::npos)
-					break;
-				start += 6;
-				size_t end = body.find("\"", start);
-				if (end == std::string::npos)
-					break;
-				std::string name = body.substr(start, end - start);
-				std::cout << "+ " + name << std::endl;
-
-				start = body.find("\r\n\r\n", end);
-				if (start == std::string::npos)
-					break;
-				start += 4;
-				end = body.find(request.getBoundary(), start);
-				if (end == std::string::npos)
-					break;
-
-				file = body.substr(start, end - start - 4);
-
-				if (!writePost(request.getRoute() + "/" + name, client, file))
-					break;
-
-				if (body[end + request.getBoundary().size()] == '-')
-					break;
+				sendError(500, client);
+				return ;
 			}
 		}
 		else
@@ -461,7 +439,6 @@ void	Response::metodPost(epoll_event & client, ParseRequest & request)
 	}
 	else
 	{
-
 		std::cout << "POST IN FILE\n";
 
 		if (!writePost(path, client, request.getBody()))

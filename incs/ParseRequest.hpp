@@ -23,6 +23,7 @@ class ParseRequest
         std::string     _version;
         std::string     _cgi_body;
         std::string     _boundary;
+        std::string     _fileName;
 
         std::map<std::string, std::string>     _rHeader;
         std::string                            _rLine;
@@ -56,6 +57,7 @@ class ParseRequest
 		size_t			getLength( void );
 
 		std::string		getBoundary( void );
+        std::string     getFileName( void );
 		std::string		getBody( void );
         std::string     getFullBody( void );
         std::string     getBodyCgi( void );
