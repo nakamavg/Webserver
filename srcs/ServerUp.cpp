@@ -113,7 +113,6 @@ void ServerUp::newConect(int serverfd, int fdEpoll,std::map<int,ServerConfig> &s
 	sockaddr in_addr;
 	socklen_t in_addr_len = sizeof(in_addr);
 	int newfd;
-	std:: cout<< "en newconnect antes de accept " << serverfd << std::endl;
 	if ((newfd = accept(serverfd, (struct sockaddr *)&in_addr, &in_addr_len)) < 0)
 	{
 		if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
@@ -229,7 +228,7 @@ void ServerUp::start()
 	if (vSockets.size() == 0)
 		return ;
 	std::cout << "Number of servers: " << nServers << std::endl;
-			std::cout << "Waiting for connections..." << std::endl;
+	std::cout << "Waiting for connections..." << std::endl;
 	while (42)
 	{
 			if(nServers == 0)
