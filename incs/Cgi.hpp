@@ -11,7 +11,7 @@ public:
 
 	// Destructor
 	~Cgi() {}
-	// Métodos adicionales de la clase
+	// Additionals
 	int handlerCgi();
 	std::string cgiResponse(std::string c);
 	std:: string &cgiResponse (void);

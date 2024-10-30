@@ -42,14 +42,10 @@ ServerConfig &ServerConfig::operator=(const ServerConfig &src)
 void ServerConfig::addLocation(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file)
 {
     Locations loc = manageLocationBracket(line, raw_file);
-    // Aquí usas `loc.id` como clave para el mapa
-    //std::cout << "Adding location: " << loc.id << std::endl; // Debug output
-
-    //std::cout << "location id: " << loc.id << loc.id.empty() << std::endl;
-
+    
     if (loc.id.empty() == 1)
         loc.id = "Default";
-    locations[loc.id] = loc; // Inserta el objeto en el mapa
+    locations[loc.id] = loc;
 
 }
 
@@ -74,21 +70,20 @@ void ServerConfig::addErrors(std::string line)
 Locations ServerConfig::manageLocationBracket(std::vector<std::string>::iterator &line, std::vector<std::string> raw_file)
 {
     int brackets = 1;
-    Locations location;  // Crear una instancia de Locations
+    Locations location; 
 
     std::string newLine = line->substr(std::string("location /").length());
     location.id = std::string(newLine, 0, newLine.find_first_of(" "));
     line++;
     while (brackets != 0 && (line != raw_file.end()))
     {
-        //std::cout << "      " << *line << std::endl;
         if (*line == "}")
             brackets--;
         else
             manageLocationBracketVar(line, location);
         line++;
     }
-    line--; // Retroceder para evaluar el }
+    line--;
     line--;
     return location;
 }
@@ -153,7 +148,6 @@ void ServerConfig::manageLocationBracketVar(std::vector<std::string>::iterator l
         if (location.upload_enable)
             throw MyException("Error: duplicated upload_enable on location");
 
-        std::cout << "patatatatatata" << std::endl;
         valueLine = cleanLine.substr(std::string("upload_enable ").length());
         location.upload_enable = (valueLine == "on");
     }
@@ -197,7 +191,6 @@ ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterato
 
     while (brackets != 0  && (line != raw_file.end()))
     {
-        // Verificar si la longitud de la línea es suficiente
         if (((*line).size() >= prefix.size()) && ((*line).substr(0, prefix.size()) == prefix))
         {
             addLocation(line, raw_file);
@@ -209,17 +202,15 @@ ServerConfig ServerConfig::manageServerBracket(std::vector<std::string>::iterato
         }
         else
         {
-            //manegar las variables sueltas
             manageServerBracketVar(line, sc);
         }
             
         line++;
     }
 
-    line--;    //volvemos atras para evaluar el }
     line--;
-    //std::cout << "Number of Locations in this server: " << locations.size() << std::endl;
-    //std::cout << "port: " << sc.port << " host: " << sc.host << " index: " << sc.def_index << " root: " << sc.def_root << std::endl;
+    line--;
+
     if (sc.port == 0 || sc.host.empty() || sc.def_index.empty() || sc.def_root.empty())
         throw MyException("Error: Missing info to be able to open the server");
     if (sc.client_max_body_size == 0)
@@ -233,7 +224,7 @@ void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &li
     std::string cleanLine = *line;
     std::string valueLine;
 
-    cleanLine.erase(cleanLine.size() - 1); // Elimina el último carácter, que podría ser un ';' o un espacio
+    cleanLine.erase(cleanLine.size() - 1);
 
     if (cleanLine.compare(0, 7, "listen ") == 0)
     {
@@ -290,7 +281,7 @@ void ServerConfig::manageServerBracketVar(std::vector<std::string>::iterator &li
 
 
 
-//----------------PRINTEOS----------------
+//----------------PRINTS----------------
 void ServerConfig::printLocation(Locations location)
 {
     std::cout << "Location ID: " << location.id << std::endl;

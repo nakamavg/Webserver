@@ -18,15 +18,12 @@ int ft_stoi(std::string str)
 
 std::string trimLeadingSpaces(const std::string& str)
 {
-    // Encuentra el primer carácter que no sea espacio (' ') ni tabulación ('\t')
     std::size_t start = str.find_first_not_of(" \t");
 
-    // Si encuentra un carácter que no sea espacio ni tabulación
     if (start != std::string::npos) {
         return str.substr(start);
     }
 
-    // Si la cadena está vacía o solo tiene espacios/tabulaciones, retorna una cadena vacía
     return "";
 }
 

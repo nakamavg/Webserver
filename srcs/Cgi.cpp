@@ -22,7 +22,7 @@ int Cgi::handleParentProcess(int fdaux[2], pid_t pid)
 
     if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
     {
-        std::cerr << "El proceso hijo terminó con un error.\n";
+        std::cerr << "The child proccess ended with an error.\n";
         return 400;
     }
     else
@@ -34,7 +34,7 @@ int Cgi::handleParentProcess(int fdaux[2], pid_t pid)
 
                 std::cout << queryString << std::endl;
         getVariable("User=");
-                std::cout << "El usuario es: " << userLogin << std::endl;
+                std::cout << "The user is: " << userLogin << std::endl;
         return 0;
     }
 }
@@ -42,7 +42,7 @@ int Cgi::handleParentProcess(int fdaux[2], pid_t pid)
 void Cgi::executeChildProcess(int fdaux[2])
 {
     char *argv[4];
-    std::cout << "El nombre del programa es: " << programName << std::endl;
+    std::cout << "The program name is: " << programName << std::endl;
 
     if (programName.find(".py") != std::string::npos)
         argv[0] = strdup(ROUTE_PYTHON);
@@ -78,27 +78,27 @@ std::string &Cgi::cgiResponse(void)
     web =
         "HTTP/1.1 200 OK\r\n"
         "Content-Type: text/html\r\n";
-        std::cout <<"el userlogin.empty devuelve = " << userLogin.empty() << std::endl;
+        std::cout <<"User login empy: = " << userLogin.empty() << std::endl;
     if (!userLogin.empty())
         web += "Set-Cookie: User= " + userLogin + "; Max-Age=3600; Path=/\r\n";
     web +=
         "Content-Length: " + ss.str() + "\r\n"
         "\r\n" + output.c_str();
-    std::cout << "La respuesta del CGI es: " << web << std::endl;
+    std::cout << "CGI response: " << web << std::endl;
     return web;
 }
 
 Cgi::Cgi(std::string _programName, std::string _queryString) : programName(_programName), queryString(_queryString)
 {
-    std::cout << "El programa es: " << programName << std::endl;
-    std::cout << "La query es: " << queryString << std::endl;
+    std::cout << "The program is: " << programName << std::endl;
+    std::cout << "The query is: " << queryString << std::endl;
 }
 
 int Cgi::handlerCgi()
 {
     int fdaux[2];
     pipe(fdaux);
-    std::cout << "la query de mi amor es: " << queryString << std::endl;
+    std::cout << "The query string is: " << queryString << std::endl;
     pid_t pid = fork();
 
     if (pid == 0)
@@ -129,13 +129,13 @@ int Cgi::handlerCgi()
             }
             else
             {
-                std::cerr << "El proceso CGI fue terminado por el timeout.\n";
+                std::cerr << "The child CGI proccess ended in a timeout.\n";
                 return 408; 
             }
         }
         else
         {
-            std::cerr << "Fork falló para el proceso de timeout.\n";
+            std::cerr << "The fork of the timeout proccess failed\n";
             return 500;
         }
     }

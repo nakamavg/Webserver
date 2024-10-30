@@ -41,7 +41,5 @@ int main(int argc, char **argv)
                 break;
         }
     }
-
-    std::cerr << "Both attempts failed. Exiting." << std::endl;
     return 1;
 }
