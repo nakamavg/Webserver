@@ -76,7 +76,6 @@ void    WebServer::parseFile()
 
     for (std::vector<std::string>::iterator line = raw_file.begin(); line != raw_file.end(); line++)
     {
-        //std::cout << *line << std::endl;
 
         if (*line == "server {")
         {
@@ -87,7 +86,6 @@ void    WebServer::parseFile()
 
                 ServerConfig sc ;
                 sc = sc.manageServerBracket(++line, raw_file);
-                //devuelve una configuracion de servidor y la guardamos
                 serverConfigs.push_back(sc);
             }
             else
@@ -95,7 +93,6 @@ void    WebServer::parseFile()
         }
         else if (*line == "}")
         {
-            //server bracket closed
             serverFlag = false;
             brackets--;
         }

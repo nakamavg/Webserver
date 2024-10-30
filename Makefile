@@ -4,16 +4,14 @@ GREEN = \033[0;32m
 YELLOW = \033[0;33m
 NC = \033[0m # No color (reiniciar)
 
-#Comandos
-DEL			=	rm -f
-CC			=	c++
-CFLAGS = -Wall -Wextra -Werror -g3 -std=c++98   
-RM = rm -rf
+# Comandos
+CC = c++
+CCFLAGS = -Wall -Wextra -Werror -std=c++98   
 
-#Nombre ejecutable
-NAME		=	webserv
+# Nombre ejecutable
+NAME = webserv
 
-#Ficheros
+# Ficheros
 SRC_FILES = ServerUp\
 	   Cgi\
 	   Response\
@@ -23,38 +21,31 @@ SRC_FILES = ServerUp\
 	   ParseRequest\
 	   main
 
-SRC			=	$(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC_FILES)))
-OBJ			=	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_FILES)))
-
-#Directorios
-SRC_DIR = srcs/
-OBJ_DIR = objs/
-OBJF = objs
-INC = incs
+SRC = $(addprefix srcs/, $(addsuffix .cpp, $(SRC_FILES)))
+OBJ = $(addprefix objs/, $(addsuffix .o, $(SRC_FILES)))
 
 # REGLAS # 
 all: $(NAME)
 
-#Compilar 
-$(NAME):$(OBJ)
-		@$(CC) $(OBJ) $(LIBS) $(LDFLAGS) $(CCFLAGS) -o $(NAME)
-		@echo "$(GREEN)WERBSERVER HAS BEEN COMPILED!$(NC)"
+# Compilar 
+$(NAME): $(OBJ)
+		@$(CC) $(OBJ) $(CCFLAGS) -o $(NAME)
+		@echo "$(GREEN)WEBSERVER HAS BEEN COMPILED!$(NC)"
 
-$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp
-	@mkdir -p $(OBJ_DIR)
+objs/%.o: srcs/%.cpp
+	@mkdir -p objs
 	@echo "$(YELLOW)Compiling: $<$(NC)"
-	@$(CC) $(CFLAGS) $(RLFLAGS) -o $@ -c $<
+	@$(CC) $(CCFLAGS) -o $@ -c $<
 	@echo "$(YELLOW)Compiled!$(NC)"
-
 
 # Eliminar temporales
 clean:
-	@$(RM) -r $(OBJ_DIR)
+	@rm -rf objs/
 	@echo "$(RED)OBJS AND DIRECTORY CLEANED!$(NC)"
 
-# Eliminar temporales y ejecutable fclean_mlx
+# Eliminar temporales y ejecutable
 fclean: clean
-	@$(RM) $(NAME)
+	@rm -f $(NAME)
 	@echo "$(RED)EXECUTABLE CLEANED!$(NC)"
 
 re: fclean all
